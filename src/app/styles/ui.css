@@ -1,0 +1,245 @@
+body {
+  font: 12px sans-serif;
+  margin: 20px;
+  /* dark mode background */
+  background-color: var(--figma-color-bg);
+  color: var(--figma-color-text);
+}
+button {
+  border-radius: 5px;
+  background-color: var(--figma-color-bg-secondary);
+  color: var(--figma-color-text-secondary);
+  border: none;
+  padding: 8px 15px;
+  margin: 0 5px;
+  outline: none;
+  cursor: pointer;
+}
+#create {
+  box-shadow: none;
+  font-size: 14px;
+  background-color: var(--figma-color-bg-component);
+  color: var(--figma-color-text-oncomponent);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+input {
+  border: none;
+  outline: none;
+  padding: 8px;
+}
+input:hover {
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+}
+button:focus {
+  box-shadow: inset 0 0 0 2px #18a0fb;
+}
+#create:focus {
+  box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.3);
+}
+input:focus {
+  box-shadow: inset 0 0 0 2px #18a0fb;
+}
+
+
+.header {
+  text-align: center;
+}
+.header--condensed {
+  text-align: left;
+  margin-bottom: 10px;
+}
+.header img {
+  width: 100px;
+  height: 100px;
+  margin-bottom: 10px;
+}
+
+.header--condensed img {
+  width: 30px;
+  height: 30px;
+}
+
+.alert {
+  background-color: #333;
+  color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 90%;
+  margin: 10px auto;
+  border-left: 5px solid #ff4757;
+}
+
+.alert span {
+  background: #4b4b4b;
+  padding: 0 7px;
+  font-family: monospace;
+}
+
+.alert.success {
+  border-left-color: #2ed573;
+}
+
+.alert h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.alert p {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.actions {
+  display: flex;
+  width: 100%;
+  justify-content: flex-end;
+}
+
+.top, .bottom {
+  width: 100%;
+}
+
+.content {
+  font-size: 14px;
+}
+
+.tabs-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.tabs-list {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border-bottom: 1px solid #ccc;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  padding: 10px 15px;
+  cursor: pointer;
+  background-color: var(--figma-color-bg);
+  user-select: none;
+}
+
+.tab:hover {
+  opacity: 0.8;
+}
+
+.tab-logo {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: var(--figma-color-bg-onselected);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 10px;
+}
+
+.tab svg {
+  font-size: 20px;
+}
+
+.tab.selected {
+  background-color: var(--figma-color-bg-selected);
+}
+
+.tab[data-id='angular'].selected .tab-logo {
+  background-color: #C3002F; /* Angular Red */
+}
+
+.tab[data-id='react'].selected .tab-logo {
+  background-color: #61DAFB; /* React Blue */
+  color: #000;
+}
+
+.tab[data-id='flutter'].selected .tab-logo {
+  background-color: #02569B; /* Flutter Blue */
+} 
+
+.code-container {
+  position: relative;
+}
+
+.copyButton {
+  opacity: 0.5;
+  margin: 0;
+  padding: 2px 4px;
+  font-size: 12px;
+  cursor: pointer;
+  position: absolute;
+  top: 4px;
+  left: 4px;
+}
+
+.copyButton:hover {
+  opacity: 1;
+}
+
+.fullSizeButton {
+  opacity: 0.8;
+  margin: 0;
+  padding: 2px 4px;
+  font-size: 14px;
+  cursor: pointer;
+  position: absolute;
+  top: 4px;
+  right: 4px;
+}
+
+.fullSizeButton:hover {
+  opacity: 1;
+}
+
+.variantProps {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.variantProps th,
+.variantProps td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: left;
+}
+
+.variantProps th {
+  /* background-color: #f2f2f2; */
+}
+
+.variantProps td {
+  /* background-color: #fff; */
+}
+
+.variantProps tr:nth-child(even) {
+  background-color: #ffffff17;
+}
+
+.variantProps svg {
+  font-size: 22px;
+}
+
+.variantProps li {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
