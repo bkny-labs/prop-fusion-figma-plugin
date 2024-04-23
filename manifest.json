@@ -1,8 +1,15 @@
 {
-  "name": "PropFusion",
-  "id": "00000000",
+  "name": "PropFusion - Component Sets to Code",
+  "id": "1364431035314372843",
   "api": "1.0.0",
   "main": "dist/code.js",
   "ui": "dist/ui.html",
-  "editorType": ["figma", "figjam"]
+  "networkAccess": {
+    "devAllowedDomains": [
+      "https://generativelanguage.googleapis.com/"
+    ],
+    "allowedDomains": ["none"]
+  },
+  "documentAccess": "none",
+  "editorType": ["figma", "dev"]
 }

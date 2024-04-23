@@ -1,9 +1,21 @@
+import { Dispatch, SetStateAction } from "react";
+
 export enum StateNames {
-  CURRENT_SELECTION = 'currentSelection',
-  SNIPPET = 'snippet'
+  CURRENT_SELECTION = "currentSelection",
+  SNIPPET = "codeSnippet",
 }
 
-export const initialState: Record<StateNames, any> = {
-  [StateNames.CURRENT_SELECTION]: null,
-  [StateNames.SNIPPET]: null
-};
+export interface SelectionItem {
+  type: string;
+  name: string;
+  description?: string;
+  children?: SelectionItem[];
+  variantGroupProperties?: Record<string, string[]>;
+  defaultVariantName?: string;
+}
+
+export interface AppState {
+  currentSelection: SelectionItem[];
+  codeSnippet: string;
+  updateState: Dispatch<SetStateAction<any>>;
+}

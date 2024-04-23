@@ -9,6 +9,9 @@
     "prettier:format": "prettier --write '**/*.{js,jsx,ts,tsx,css,json}' "
   },
   "dependencies": {
+    "@google/generative-ai": "^0.8.0",
+    "lodash": "^4.17.21",
+    "lodash.debounce": "^4.0.8",
     "monaco-editor": "^0.44.0",
     "monaco-editor-webpack-plugin": "^7.1.0",
     "react": "^18.2.0",
@@ -23,6 +26,7 @@
     "@types/react": "^18.0.17",
     "@types/react-dom": "^18.0.6",
     "css-loader": "^6.7.1",
+    "dotenv-webpack": "^8.1.0",
     "html-webpack-plugin": "^5.5.0",
     "husky": "^8.0.1",
     "lint-staged": "^13.0.3",
