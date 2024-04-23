@@ -221,7 +221,7 @@ input:focus {
 
 .code-container {
   position: relative;
-  height: 493px;
+  height: auto;
   overflow: auto;
   transition: 0.5s all ease-in-out;
 }
@@ -340,8 +340,12 @@ input:focus {
   padding: 0 18px 0 8px;
   height: 535px;
   margin-bottom: 20px;
-  overflow-y: scroll;
+  overflow-y: auto;
   overflow-x: hidden;
+}
+
+.component-content--devMode {
+  height: 90vh;
 }
 
 .component-content h3 {
