@@ -2,6 +2,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const InlineChunkHtmlPlugin = require('react-dev-utils/InlineChunkHtmlPlugin');
 
 const path = require('path');
+const Dotenv = require('dotenv-webpack');
 
 module.exports = (env, argv) => ({
   mode: argv.mode === 'production' ? 'production' : 'development',
@@ -42,5 +43,6 @@ module.exports = (env, argv) => ({
       cache: false,
     }),
     new InlineChunkHtmlPlugin(HtmlWebpackPlugin, [/ui/]),
+    new Dotenv()
   ],
 });

@@ -135,27 +135,47 @@ const renderSelectionDetails = (nodes) => {
       <div key={index} className="component-content">
         <div className="alert component">
           <h3>Component Set Review</h3>
-          <p>Please review the layer name, description and properties. They will be used to generate component code.</p>
+          <p>Please review the component's details and properties. They will be used to generate component code.</p>
         </div>
 
         <div className="component-info">
-          <p>
-            <strong>Name:</strong> {node.name}
-          </p>
-          {
+        <h3>Component Details</h3>
+        <table className="custom-table">
+          <tbody>
+            <tr>
+              <td>Name</td>
+              <td>{node.name}</td>
+            </tr>
+            {
             node.link ? (
-              <p>
-                <strong>Documentation:</strong> <a href={node.link} target='_blank'>{node.link}</a>
-              </p>
+              <tr>
+                <td>Documentation</td> 
+                <td><a href={node.link} target='_blank'>{node.link}</a></td>
+              </tr>
             ) : (
-              <></>
+              <tr>
+                <td>Description</td> 
+                <td>No documentation link added.</td>
+              </tr>
             )}
-          <p>
-            <strong>Description:</strong> {node.description}
-          </p>
-          <p>
-            <strong>Default:</strong> {node.defaultVariantName}
-          </p>
+            {
+            node.description ? (
+              <tr>
+                <td>Description</td> 
+                <td>{node.description}</td>
+              </tr>
+            ) : (
+              <tr>
+                <td>Description</td> 
+                <td>No description added.</td>
+              </tr>
+            )}
+            <tr>
+              <td>Default</td>
+              <td>{node.defaultVariantName}</td>
+            </tr>
+            </tbody>
+          </table>
         </div>
         <h3>Variant Groups ({Object.keys(node.variantGroupProperties).length})</h3>
         <table className="custom-table">
@@ -173,7 +193,7 @@ const renderSelectionDetails = (nodes) => {
                   {['Size', 'Sizes', 'sizes', 'size'].includes(key) && <MdDevices />}
                   {['Variant', 'Kind', 'Type', 'Class', 'Action', 'Hierarchy', 'Theme', 'Style'].includes(key) && <IoColorPaletteOutline />}
                   {['Social', 'Store'].includes(key) && <IoShareSocialOutline />}
-                  { ['State', 'Destructive', 'Pressed', ].includes(key) && <FaRegHandPointer />}
+                  { ['State', 'Destructive', 'Pressed', 'Checked', 'Indeterminate' ].includes(key) && <FaRegHandPointer />}
                   { ['Label', 'Icon', 'icon', 'Leading icon', 'Hint text', 'Help icon', 'text', 'Text', 'Supporting text'].includes(key) && <IoText />}
                 </td>
                 <td>{key}</td>

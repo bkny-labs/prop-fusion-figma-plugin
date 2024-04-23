@@ -9,6 +9,9 @@ body {
 body a {
   color: var(--figma-color-text-link);
 }
+body a:hover {
+  color: var(--figma-color-bg-component);
+}
 
 button {
   border-radius: 5px;
@@ -228,6 +231,8 @@ input:focus {
     font-weight: 300; }
   .custom-table tbody th a, .custom-table tbody td a {
     color: rgba(255, 255, 255, 0.3); }
+    .custom-table tbody th a, .custom-table tbody td a:hover {
+      color: var(--figma-color-bg-component); }
   .custom-table tbody th .more, .custom-table tbody td .more {
     color: rgba(255, 255, 255, 0.3);
     font-size: 11px;
@@ -240,7 +245,7 @@ input:focus {
   -o-transition: .3s all ease;
   transition: .3s all ease; }
   .custom-table tbody tr:hover td, .custom-table tbody tr:focus td {
-    color: var(--figma-color-bg-component); }
+    color: var(--figma-color-text); }
 
     .custom-table svg {
       font-size: 20px;
@@ -297,4 +302,11 @@ input:focus {
   margin: 0;
   font-size: 16px;
   line-height: 1.5;
+}
+.component-info svg {
+  font-size: 20px;
+}
+
+.component-info svg path {
+  fill: var(--figma-color-text);
 }
