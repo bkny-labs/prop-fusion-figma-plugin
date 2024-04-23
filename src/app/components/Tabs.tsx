@@ -1,6 +1,7 @@
 import React, { useState, CSSProperties } from 'react';
-import { FaAngular, FaReact } from 'react-icons/fa';
+import { FaAngular, FaCss3Alt, FaReact } from 'react-icons/fa';
 import { TbBrandFlutter } from "react-icons/tb";
+import { SiTypescript } from "react-icons/si";
 import CodeSnippet from './CodeSnippet';
 
 interface TabData {
@@ -23,11 +24,22 @@ const Tabs: React.FC<TabsProps> = ({ style, codeSnippets }) => {
       id: 'react', label: 'React', icon: <FaReact />,
       code: undefined
     },
-    { id: 'angular', label: 'Angular', icon: <FaAngular />,
+    {
+      id: 'angular', label: 'Angular', icon: <FaAngular />,
       code: undefined
     },
-    { id: 'flutter', label: 'Flutter', icon: <TbBrandFlutter />,
-    code: undefined },
+    {
+      id: 'flutter', label: 'Flutter', icon: <TbBrandFlutter />,
+      code: undefined
+    },
+    {
+      id: 'typescript', label: 'TypeScript', icon: <SiTypescript />,
+      code: undefined
+    },
+    {
+      id: 'css', label: 'CSS', icon: <FaCss3Alt />,
+      code: undefined
+    }
   ];
 
   return (

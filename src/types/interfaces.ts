@@ -13,6 +13,8 @@ interface Fill {
 
 // Define the structure for variant values to clearly indicate it's an array of strings
 interface VariantValues {
+  map(arg0: (value: any) => string): unknown;
+  includes(arg0: string): unknown;
   values: string[]; // Clearly an array of strings
 }
 

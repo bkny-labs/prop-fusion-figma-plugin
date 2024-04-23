@@ -4,13 +4,18 @@ body {
   /* dark mode background */
   background-color: var(--figma-color-bg);
   color: var(--figma-color-text);
+  font-family: system-ui;
 }
+body a {
+  color: var(--figma-color-text-link);
+}
+
 button {
   border-radius: 5px;
   background-color: var(--figma-color-bg-secondary);
   color: var(--figma-color-text-secondary);
   border: none;
-  padding: 8px 15px;
+  padding: 10px 18px;
   margin: 0 5px;
   outline: none;
   cursor: pointer;
@@ -23,6 +28,12 @@ button {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+#create:hover {
+  background-color: var(--figma-color-bg-component-hover);
+}
+#create:active {
+  background-color: var(--figma-color-bg-component-focus);
 }
 input {
   border: none;
@@ -46,51 +57,10 @@ input:focus {
 .header {
   text-align: center;
 }
-.header--condensed {
-  text-align: left;
-  margin-bottom: 10px;
-}
 .header img {
   width: 100px;
   height: 100px;
   margin-bottom: 10px;
-}
-
-.header--condensed img {
-  width: 30px;
-  height: 30px;
-}
-
-.alert {
-  background-color: #333;
-  color: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  width: 90%;
-  margin: 10px auto;
-  border-left: 5px solid #ff4757;
-}
-
-.alert span {
-  background: #4b4b4b;
-  padding: 0 7px;
-  font-family: monospace;
-}
-
-.alert.success {
-  border-left-color: #2ed573;
-}
-
-.alert h3 {
-  margin-top: 0;
-  margin-bottom: 10px;
-}
-
-.alert p {
-  margin: 0;
-  font-size: 16px;
-  line-height: 1.5;
 }
 
 .container {
@@ -105,6 +75,7 @@ input:focus {
   display: flex;
   width: 100%;
   justify-content: flex-end;
+  padding-bottom: 10px;
 }
 
 .top, .bottom {
@@ -132,7 +103,8 @@ input:focus {
 .tab {
   display: flex;
   align-items: center;
-  padding: 10px 15px;
+  padding: 8px 12px;
+  font-size: 13px;
   cursor: pointer;
   background-color: var(--figma-color-bg);
   user-select: none;
@@ -143,8 +115,8 @@ input:focus {
 }
 
 .tab-logo {
-  width: 30px;
-  height: 30px;
+  width: 25px;
+  height: 25px;
   border-radius: 50%;
   background-color: var(--figma-color-bg-onselected);
   display: flex;
@@ -154,7 +126,7 @@ input:focus {
 }
 
 .tab svg {
-  font-size: 20px;
+  font-size: 18px;
 }
 
 .tab.selected {
@@ -172,10 +144,26 @@ input:focus {
 
 .tab[data-id='flutter'].selected .tab-logo {
   background-color: #02569B; /* Flutter Blue */
-} 
+}
+
+.tab[data-id='typescript'].selected .tab-logo {
+  background-color: #3178C6; /* TypeScript Blue */
+}
+
+.tab[data-id='css'].selected .tab-logo {
+  background-color: #264de4; /* CSS Blue */
+  color: #fff;
+}
+
 
 .code-container {
   position: relative;
+  height: 455px;
+  overflow: auto;
+  transition: 0.5s all ease-in-out;
+}
+.code-container:hover {
+  box-shadow: 1px 2px 6px #0000009c;
 }
 
 .copyButton {
@@ -208,38 +196,105 @@ input:focus {
   opacity: 1;
 }
 
-.variantProps {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 20px;
-}
-
-.variantProps th,
-.variantProps td {
-  border: 1px solid #ccc;
-  padding: 8px;
-  text-align: left;
-}
-
-.variantProps th {
-  /* background-color: #f2f2f2; */
-}
-
-.variantProps td {
-  /* background-color: #fff; */
-}
-
-.variantProps tr:nth-child(even) {
-  background-color: #ffffff17;
-}
-
 .variantProps svg {
   font-size: 22px;
 }
 
-.variantProps li {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 8px;
+.custom-table {
+  width: 100%;
+  font-family: monospace;
+}
+
+.custom-table thead tr, .custom-table thead th {
+  padding: 15px 0;
+  border-top: none;
+  border-bottom: none !important;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .2rem; }
+.custom-table tbody th, .custom-table tbody td {
+  color: #777;
+  font-weight: 400;
+  padding: 12px 18px;
+  font-weight: 300;
+  font-size: 13px;
+  line-height: 22px;
+  border: none;
+  -webkit-transition: .3s all ease;
+  -o-transition: .3s all ease;
+  transition: .3s all ease; }
+  .custom-table tbody th small, .custom-table tbody td small {
+    color: rgba(255, 255, 255, 0.3);
+    font-weight: 300; }
+  .custom-table tbody th a, .custom-table tbody td a {
+    color: rgba(255, 255, 255, 0.3); }
+  .custom-table tbody th .more, .custom-table tbody td .more {
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 11px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: .2rem; }
+.custom-table tbody tr {
+  background: #0000001f;
+  -webkit-transition: .3s all ease;
+  -o-transition: .3s all ease;
+  transition: .3s all ease; }
+  .custom-table tbody tr:hover td, .custom-table tbody tr:focus td {
+    color: var(--figma-color-bg-component); }
+
+    .custom-table svg {
+      font-size: 20px;
+    }
+.component-content {
+  padding: 0 12px;
+  height: 550px;
+  overflow: auto;
+}
+
+.component-content h3 {
+  margin-top: 40px;
+}
+
+.resize-handle {
+  display: block;
+  height: 20px;
+  width: 20px;
+  position: absolute;
+  right: 0;
+  cursor: nwse-resize;
+}
+
+.alert {
+  background-color: #333;
+  color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin: 0;
+  border-left: 5px solid #ff4757;
+}
+
+.alert span {
+  background: #4b4b4b;
+  padding: 0 7px;
+  font-family: monospace;
+}
+
+.alert.success {
+  border-left-color: var(--figma-color-bg-success);
+}
+
+.alert.component {
+  border-left-color: var(--figma-color-bg-component);
+}
+
+.alert h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.alert p {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.5;
 }
