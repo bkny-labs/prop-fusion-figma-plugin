@@ -6,7 +6,7 @@ export class StateService {
   public states$: Observable<Record<StateNames, any>>;
 
   constructor() {
-    const appState = { [StateNames.CURRENT_SELECTION]: [], [StateNames.SNIPPET]: '' };
+    const appState = { [StateNames.CURRENT_SELECTION]: [], [StateNames.SNIPPET]: '', [StateNames.LOADING]: false};
     this.statesSubject = new BehaviorSubject(appState);
   }
 

@@ -4,10 +4,10 @@ import { StateService } from '../app/services/state.service';
 import { serializeNode } from '../app/utils/serializer';
 import { StateNames } from '../types/states.model';
 
-export const widthLarge = 600;
+export const widthLarge = 650;
 export const heightLarge = 650;
-export const widthSmall = 480;
-export const heightSmall = 350;
+export const widthSmall = 400;
+export const heightSmall = 360;
 
 class FigmaController {
   _messageService;
@@ -63,6 +63,7 @@ class FigmaController {
   }
 
   handleSelectionChange() {
+    this._stateService.setState(StateNames.LOADING, true);
     const selections = figma.currentPage.selection;
     const currentNode = selections.map(serializeNode);
     figma.ui.postMessage({ type: 'selection-update', selection: currentNode });
@@ -73,11 +74,16 @@ class FigmaController {
       this._stateService.setState(StateNames.CURRENT_SELECTION, currentNode); // Set current node even if it's not a component set
       this._stateService.clearState(StateNames.SNIPPET);
       figma.ui.resize(widthSmall, heightSmall);
-    } else {
+    } else if(selections.length === 1) {
       figma.ui.resize(widthLarge, heightLarge);
     }
 
     this._stateService.setState(StateNames.CURRENT_SELECTION, currentNode);
+    this._stateService.setState(StateNames.LOADING, false);
+    setTimeout(() => {
+      this._stateService.setState(StateNames.LOADING, false);
+      figma.ui.postMessage({ type: 'loading-update', loading: false });
+    }, 1000);
   }
 
   getCurrentSelection() {

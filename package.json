@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.8.0",
+    "file-saver": "^2.0.5",
     "lodash": "^4.17.21",
     "lodash.debounce": "^4.0.8",
     "monaco-editor": "^0.44.0",

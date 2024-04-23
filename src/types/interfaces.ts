@@ -18,6 +18,13 @@ interface VariantValues {
   values: string[]; // Clearly an array of strings
 }
 
+interface ComponentPropertyValues {
+  map(arg0: (value: any) => string): unknown;
+  includes(arg0: string): unknown;
+  variantOptions: string[]; // Clearly an array of strings
+}
+
+
 // Define variant group properties to use VariantValues
 interface VariantGroupProperties {
   [key: string]: VariantValues;
@@ -28,7 +35,7 @@ interface Component {
   id: string;
   name: string;
   type: string;
-  variantGroupProperties?: VariantGroupProperties;
+  componentPropertyDefinitions?: ComponentPropertyDefinitions;
 }
 
 // Define the message structure that includes a selection of Components

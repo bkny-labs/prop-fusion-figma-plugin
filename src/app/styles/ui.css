@@ -1,14 +1,15 @@
 body {
   font: 12px sans-serif;
   margin: 20px;
-  /* dark mode background */
   background-color: var(--figma-color-bg);
   color: var(--figma-color-text);
   font-family: system-ui;
 }
+
 body a {
   color: var(--figma-color-text-link);
 }
+
 body a:hover {
   color: var(--figma-color-bg-component);
 }
@@ -23,7 +24,13 @@ button {
   outline: none;
   cursor: pointer;
 }
-#create {
+
+button:hover {
+  color: var(--figma-color-text-secondary-hover);
+}
+
+#create,
+#generate {
   box-shadow: none;
   font-size: 14px;
   background-color: var(--figma-color-bg-component);
@@ -32,12 +39,27 @@ button {
   align-items: center;
   gap: 8px;
 }
+
 #create:hover {
   background-color: var(--figma-color-bg-component-hover);
 }
+
 #create:active {
   background-color: var(--figma-color-bg-component-focus);
 }
+
+#generate {
+  background-color: var(--figma-color-bg-brand-tertiary);
+}
+
+#generate:hover {
+  background-color: var(--figma-color-bg-brand-hover);
+}
+
+#generate:active {
+  background-color: var(--figma-color-bg-brand-focus);
+}
+
 
 #goBack {
   box-shadow: none;
@@ -48,26 +70,33 @@ button {
   align-items: center;
   gap: 8px;
 }
+
 #goBack:hover {
   background-color: var(--figma-color-bg-component-hover);
 }
+
 #goBack:active {
   background-color: var(--figma-color-bg-component-focus);
 }
+
 input {
   border: none;
   outline: none;
   padding: 8px;
 }
+
 input:hover {
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
 }
+
 button:focus {
   box-shadow: inset 0 0 0 2px #18a0fb;
 }
+
 #create:focus {
   box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.3);
 }
+
 input:focus {
   box-shadow: inset 0 0 0 2px #18a0fb;
 }
@@ -76,6 +105,7 @@ input:focus {
 .header {
   text-align: center;
 }
+
 .header img {
   width: 100px;
   height: 100px;
@@ -93,11 +123,20 @@ input:focus {
 .actions {
   display: flex;
   width: 100%;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
   padding-bottom: 10px;
 }
 
-.top, .bottom {
+.actions label {
+  cursor: pointer;
+  color: var(--figma-color-text-disabled);
+  user-select: none;
+}
+
+.top,
+.bottom {
   width: 100%;
 }
 
@@ -153,34 +192,40 @@ input:focus {
 }
 
 .tab[data-id='angular'].selected .tab-logo {
-  background-color: #C3002F; /* Angular Red */
+  background-color: #C3002F;
+  /* Angular Red */
 }
 
 .tab[data-id='react'].selected .tab-logo {
-  background-color: #61DAFB; /* React Blue */
+  background-color: #61DAFB;
+  /* React Blue */
   color: #000;
 }
 
 .tab[data-id='flutter'].selected .tab-logo {
-  background-color: #02569B; /* Flutter Blue */
+  background-color: #02569B;
+  /* Flutter Blue */
 }
 
 .tab[data-id='typescript'].selected .tab-logo {
-  background-color: #3178C6; /* TypeScript Blue */
+  background-color: #3178C6;
+  /* TypeScript Blue */
 }
 
 .tab[data-id='css'].selected .tab-logo {
-  background-color: #264de4; /* CSS Blue */
+  background-color: #264de4;
+  /* CSS Blue */
   color: #fff;
 }
 
 
 .code-container {
   position: relative;
-  height: 455px;
+  height: 493px;
   overflow: auto;
   transition: 0.5s all ease-in-out;
 }
+
 .code-container:hover {
   box-shadow: 1px 2px 6px #0000009c;
 }
@@ -221,59 +266,86 @@ input:focus {
 
 .custom-table {
   width: 100%;
-  font-family: monospace;
+  /* font-family: monospace; */
 }
 
-.custom-table thead tr, .custom-table thead th {
+.custom-table thead tr,
+.custom-table thead th {
   padding: 15px 0;
   border-top: none;
   border-bottom: none !important;
   font-size: 11px;
   text-transform: uppercase;
-  letter-spacing: .2rem; }
-.custom-table tbody th, .custom-table tbody td {
-  color: #777;
+  color: var(--figma-color-text-disabled);
+  letter-spacing: .2rem;
+}
+
+.custom-table tbody th,
+.custom-table tbody td {
+  color: var(--figma-color-text-disabled);
   font-weight: 400;
-  padding: 12px 18px;
+  padding: 12px;
   font-weight: 300;
   font-size: 13px;
+  line-height: 20px;
   line-height: 22px;
   border: none;
   -webkit-transition: .3s all ease;
   -o-transition: .3s all ease;
-  transition: .3s all ease; }
-  .custom-table tbody th small, .custom-table tbody td small {
-    color: rgba(255, 255, 255, 0.3);
-    font-weight: 300; }
-  .custom-table tbody th a, .custom-table tbody td a {
-    color: rgba(255, 255, 255, 0.3); }
-    .custom-table tbody th a, .custom-table tbody td a:hover {
-      color: var(--figma-color-bg-component); }
-  .custom-table tbody th .more, .custom-table tbody td .more {
-    color: rgba(255, 255, 255, 0.3);
-    font-size: 11px;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: .2rem; }
+  transition: .3s all ease;
+}
+
+.custom-table tbody th small,
+.custom-table tbody td small {
+  color: rgba(255, 255, 255, 0.3);
+  font-weight: 300;
+}
+
+.custom-table tbody th a,
+.custom-table tbody td a {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.custom-table tbody th a,
+.custom-table tbody td a:hover {
+  color: var(--figma-color-bg-component);
+}
+
+.custom-table tbody th .more,
+.custom-table tbody td .more {
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .2rem;
+}
+
 .custom-table tbody tr {
   background: #0000001f;
   -webkit-transition: .3s all ease;
   -o-transition: .3s all ease;
-  transition: .3s all ease; }
-  .custom-table tbody tr:hover td, .custom-table tbody tr:focus td {
-    color: var(--figma-color-text); }
+  transition: .3s all ease;
+}
 
-    .custom-table svg {
-      font-size: 20px;
-    }
+.custom-table tbody tr:hover td,
+.custom-table tbody tr:focus td {
+  color: var(--figma-color-text);
+}
+
+.custom-table svg {
+  font-size: 20px;
+}
+
 .component-content {
-  padding: 0 12px;
-  height: 550px;
-  overflow: auto;
+  padding: 0 18px 0 8px;
+  height: 535px;
+  margin-bottom: 20px;
+  overflow-y: scroll;
+  overflow-x: hidden;
 }
 
 .component-content h3 {
-  margin-top: 40px;
+  margin-top: 30px;
 }
 
 .resize-handle {
@@ -289,16 +361,19 @@ input:focus {
   background-color: #333;
   color: #fff;
   padding: 20px;
-  border-radius: 8px;
+  border-radius: 4px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   margin: 0;
   border-left: 5px solid #ff4757;
 }
 
 .alert span {
-  background: #4b4b4b;
-  padding: 0 7px;
+  background: var(--figma-color-bg-component-pressed);
+  padding: 0 4px;
   font-family: monospace;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .alert.success {
@@ -309,6 +384,10 @@ input:focus {
   border-left-color: var(--figma-color-bg-component);
 }
 
+.alert.brand {
+  border-left-color: var(--figma-color-bg-brand-tertiary);
+}
+
 .alert h3 {
   margin-top: 0;
   margin-bottom: 10px;
@@ -316,13 +395,42 @@ input:focus {
 
 .alert p {
   margin: 0;
-  font-size: 16px;
+  font-size: 12px;
   line-height: 1.5;
 }
+
 .component-info svg {
-  font-size: 20px;
+  font-size: 14px;
 }
 
 .component-info svg path {
   fill: var(--figma-color-text);
+}
+
+.version {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 12px;
+  color: var(--figma-color-text-disabled);
+  gap: 10px;
+  align-items: center;
+}
+
+.version .links a {
+  text-decoration: none;
+  transition: 0.3s all ease-in-out;
+}
+
+.version .links a:hover {
+  color: var(--figma-color-text);
+}
+
+.version .links {
+  display: flex;
+  gap: 8px;
+}
+
+.checkbox-container {
+  display: flex;
+  align-items: center;
 }
