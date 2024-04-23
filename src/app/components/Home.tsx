@@ -2,8 +2,8 @@ import React, { useCallback, useEffect, useState } from 'react';
 import logo from '../assets/logo.png';
 import '../styles/ui.css';
 import Tabs from './Tabs';
-import { MdDevices } from "react-icons/md";
-import { FaCode, FaRegHandPointer } from 'react-icons/fa';
+import { MdDevices, MdOutlineSkipPrevious } from "react-icons/md";
+import { FaCode, FaRegHandPointer, FaStepBackward } from 'react-icons/fa';
 import { IoColorPaletteOutline, IoShareSocialOutline, IoText } from "react-icons/io5";
 
 const Home: React.FC = () => {
@@ -117,6 +117,11 @@ const Home: React.FC = () => {
       <div className="bottom">
         {validSelection ? (
           <div className="actions">
+            {codeSnippet ? (
+              <button id="goBack" onClick={() => setCodeSnippet(null)}>
+              <MdOutlineSkipPrevious /> Back
+              </button>
+              ): ''}
             <button id="create" onClick={handleRequestSnippet}>
               <FaCode /> Generate Component
             </button>

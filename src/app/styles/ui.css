@@ -38,6 +38,22 @@ button {
 #create:active {
   background-color: var(--figma-color-bg-component-focus);
 }
+
+#goBack {
+  box-shadow: none;
+  font-size: 14px;
+  background-color: var(--figma-color-bg-secondary);
+  color: var(--figma-color-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+#goBack:hover {
+  background-color: var(--figma-color-bg-component-hover);
+}
+#goBack:active {
+  background-color: var(--figma-color-bg-component-focus);
+}
 input {
   border: none;
   outline: none;
