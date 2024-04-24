@@ -3,6 +3,8 @@ import { Dispatch, SetStateAction } from "react";
 export enum StateNames {
   CURRENT_SELECTION = "currentSelection",
   SNIPPET = "codeSnippet",
+  LOADING = "loading",
+  EDITOR_TYPE = "editorType",
 }
 
 export interface SelectionItem {
@@ -10,7 +12,7 @@ export interface SelectionItem {
   name: string;
   description?: string;
   children?: SelectionItem[];
-  variantGroupProperties?: Record<string, string[]>;
+  componentPropertyDefinitions?: ComponentPropertyDefinitions;
   defaultVariantName?: string;
 }
 

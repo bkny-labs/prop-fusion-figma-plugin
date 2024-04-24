@@ -11,5 +11,13 @@
     "allowedDomains": ["none"]
   },
   "documentAccess": "none",
-  "editorType": ["figma", "dev"]
+  "editorType": ["figma", "dev"],
+  "capabilities": ["codegen", "vscode", "inspect"],
+  "codegenLanguages": [
+    { "label": "Angular", "value": "angular" },
+    { "label": "React", "value": "react" },
+    { "label": "Flutter", "value": "flutter" },
+    { "label": "CSS", "value": "css" },
+    { "label": "Typescript", "value": "typescript" }
+  ]
 }
