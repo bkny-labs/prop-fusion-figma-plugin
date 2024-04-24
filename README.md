@@ -1,6 +1,6 @@
-# PropFusion Figma Plugin
+<img src="src/app/assets/logo.png" alt="PropFusion" width="120 " height="120 ">
 
-<img src="src/app/assets/logo.png" alt="PropFusion" width="75 " height="75 ">
+# PropFusion Figma Plugin
 
 This Figma Plugin translates component set props from Figma to Typescript, React, Angular, Flutter.
 
