@@ -107,8 +107,8 @@ input:focus {
 }
 
 .header img {
-  width: 100px;
-  height: 100px;
+  width: 80px;
+  height: 80px;
   margin-bottom: 10px;
 }
 
@@ -414,7 +414,7 @@ input:focus {
 .version {
   display: flex;
   justify-content: flex-end;
-  padding: 0 12px;
+  padding: 5px 12px 0;
   color: var(--figma-color-text-disabled);
   gap: 10px;
   align-items: center;

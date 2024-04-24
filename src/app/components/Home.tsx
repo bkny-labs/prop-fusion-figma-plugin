@@ -103,7 +103,7 @@ const Home: React.FC = () => {
             <div className="header">
               <img src={logo} alt="Logo" />
               <h2>PropFusion</h2>
-              <p>Turn your Figma component set into reusable base component code. Supports React, Angular, Flutter, Typescript and CSS.</p>
+              <p>Convert your Figma component set into reusable base components for React, Angular, Flutter, TypeScript, and CSS.</p>
             </div>
             {!validSelection && !nothingSelected ? (
               <div className="alert">
@@ -203,7 +203,7 @@ const renderSelectionDetails = (nodes, isAiChecked, isDevMode) => {
           ) : 
           <div className="alert component">
             <h3><svg className="svg" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 12 12"><path fill="currentColor" stroke="none" d="M3.743 2.748 6 .5l2.257 2.248L6 4.996 3.743 2.748zm-.995 5.51L.5 6l2.248-2.257L4.996 6 2.748 8.257zm5.51.994L6 11.5 3.743 9.252 6 7.004l2.257 2.248zM11.5 6 9.252 3.743 7.004 6l2.248 2.257L11.5 6z"></path></svg> Component Set Review</h3>
-            <p>Please review the component's details and properties. They will be used to create component code.</p>
+            <p>Review the component details and properties before generating code.</p>
           </div>
         }
 
