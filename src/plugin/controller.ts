@@ -83,6 +83,7 @@ class FigmaController {
     setTimeout(() => {
       this._stateService.setState(StateNames.LOADING, false);
       figma.ui.postMessage({ type: 'loading-update', loading: false });
+      this.setEditorType(figma.editorType);
     }, 1000);
   }
 
@@ -96,6 +97,11 @@ class FigmaController {
     console.log('THE WINDOW SHOULD BE RESIZING ON DRAG TO', width, height);
     figma.ui.resize(width, height);
   };
+
+  setEditorType(editorType: string) {
+    this._stateService.setState(StateNames.EDITOR_TYPE, editorType);
+    figma.ui.postMessage({ type: 'editor-type', editor: editorType });
+  }
 }
 
 export const figmaController = new FigmaController();

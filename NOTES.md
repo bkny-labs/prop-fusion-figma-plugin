@@ -3,7 +3,7 @@
    - module and .spec.ts file generation
 2. React
 3. SCSS support
-4. IDea: Before clicking create / generate code - the user configures the create settings:
+4. Before clicking create / generate code - the user configures the create settings:
       1. Select Framework (Angular, react, flutter)
       2. Select SCSS or CSS
       3. Select Gemini or not

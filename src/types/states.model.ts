@@ -4,6 +4,7 @@ export enum StateNames {
   CURRENT_SELECTION = "currentSelection",
   SNIPPET = "codeSnippet",
   LOADING = "loading",
+  EDITOR_TYPE = "editorType",
 }
 
 export interface SelectionItem {

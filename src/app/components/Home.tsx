@@ -17,6 +17,7 @@ const Home: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [readyToGenerate, setReadyToGenerate] = useState(false);
   const [isAiChecked, setIsAiChecked] = useState(false);
+  const [isDevMode, setIsDevMode] = useState(false);
 
   useEffect(() => {
     parent.postMessage({ pluginMessage: { type: 'get-current-selection' } }, '*');
@@ -25,7 +26,6 @@ const Home: React.FC = () => {
 
       if (message.type === 'loading-update') {
         setLoading(message.loading);
-        console.log('Loading in the view:', message.loading);
       }
 
       if (message.type === 'selection-update') {
@@ -50,6 +50,10 @@ const Home: React.FC = () => {
 
       if (message.type === 'deliver-snippet') {
         setCodeSnippet(message.code);
+      }
+
+      if (message.type === 'editor-type') {
+        setIsDevMode(message.editor === 'dev');
       }
 
     };
@@ -81,7 +85,7 @@ const Home: React.FC = () => {
               {!codeSnippet && (
                 <div>
                   {currentSelection.length === 1 ? (
-                    renderSelectionDetails(currentSelection, isAiChecked)
+                    renderSelectionDetails(currentSelection, isAiChecked, isDevMode)
                   ) : (
                     <></>
                   )}
@@ -185,10 +189,10 @@ const Home: React.FC = () => {
   );
 }
 
-const renderSelectionDetails = (nodes, isAiChecked) => {
+const renderSelectionDetails = (nodes, isAiChecked, isDevMode) => {
   return (nodes || []).map((node, index) => (
     <>
-      <div key={index} className="component-content">
+      <div key={index} className={`component-content ${isDevMode ? 'component-content--devMode' : ''}`}>
 
         {
           isAiChecked ? (
