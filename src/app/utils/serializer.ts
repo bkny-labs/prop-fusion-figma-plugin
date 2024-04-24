@@ -5,7 +5,6 @@ export function serializeNode(node, depth = 0): any {
   const componentPropertyDefinitions = {};
   const variantGroupProperties = {};
   let serializedChildren = [];
-  // console.log('original node', node);
 
   if (componentSet) {
     componentPropertyDefinitionNames.forEach(name => {

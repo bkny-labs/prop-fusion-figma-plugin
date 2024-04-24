@@ -21,9 +21,15 @@
 
 # Discussion
 1. Gemini - maybe to use this better, we need to drill down on the specific code style before hand. 
+2. How do I get the props to be mapped to particular CSS or Flutter PROPERTIES 
+   1. ie: size -> padding, color -> backgroundColor etc.
+   2. This seems to be design system specific, wondering if it should be configurable in the UI
+   3. Doesn't look like this can be determined the ComponentSetNode itself, so it has to happen in a data transformation step
 
 # Pro Version
 
 1. Connect component to Github 
    1. Similar to how code connect works in Figma - can I just use code connect? Maybe there's metadata to tap?
 2. Save/push to Github (similar to how Tokens studio does it - maybe this creates a PR or something)
+
+
