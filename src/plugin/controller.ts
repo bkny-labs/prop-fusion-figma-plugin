@@ -1,4 +1,5 @@
 import { GeminiService } from '../app/services/gemini.service';
+import { GitHubIntegration } from '../app/services/github';
 import { MessageService } from '../app/services/message.service';
 import { StateService } from '../app/services/state.service';
 import { serializeNode } from '../app/utils/serializer';
@@ -13,6 +14,8 @@ class FigmaController {
   _messageService;
   _stateService;
   _geminiService;
+  private gitHubIntegration: GitHubIntegration;
+  private gitHubAuthToken = process.env.GITHUB_API_KEY;
   constructor() {
     this._messageService = new MessageService();
     this._stateService = new StateService();
@@ -20,6 +23,7 @@ class FigmaController {
     this.init();
     console.log("🍇🍇 FigmaController initialized");
     this._stateService.setState(StateNames.CURRENT_SELECTION, figma.currentPage.selection.map(serializeNode));
+    this.gitHubIntegration = new GitHubIntegration(this.gitHubAuthToken);
   }
 
   addListeners() {
@@ -101,6 +105,11 @@ class FigmaController {
   setEditorType(editorType: string) {
     this._stateService.setState(StateNames.EDITOR_TYPE, editorType);
     figma.ui.postMessage({ type: 'editor-type', editor: editorType });
+  }
+
+  async syncWithGitHub() {
+    const repositories = await this.gitHubIntegration.getRepositories();
+    console.log('🍇🍇 GitHub repositories:', repositories);
   }
 }
 
