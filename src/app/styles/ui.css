@@ -438,3 +438,7 @@ input:focus {
   display: flex;
   align-items: center;
 }
+
+.button-group {
+  display: flex;
+}

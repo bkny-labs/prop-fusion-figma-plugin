@@ -10,9 +10,12 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.8.0",
+    "@types/lodash": "^4.17.0",
+    "deep-diff": "^1.0.2",
     "file-saver": "^2.0.5",
     "lodash": "^4.17.21",
     "lodash.debounce": "^4.0.8",
+    "microdiff": "^1.4.0",
     "monaco-editor": "^0.44.0",
     "monaco-editor-webpack-plugin": "^7.1.0",
     "react": "^18.2.0",

@@ -1,6 +1,7 @@
 import { GeminiService } from '../app/services/gemini.service';
 import { MessageService } from '../app/services/message.service';
 import { StateService } from '../app/services/state.service';
+import { calculateVariantProperties } from '../app/utils/component-prop-diff';
 import { serializeNode } from '../app/utils/serializer';
 import { StateNames } from '../types/states.model';
 
@@ -18,8 +19,6 @@ class FigmaController {
     this._stateService = new StateService();
     this._geminiService = new GeminiService();
     this.init();
-    console.log("🍇🍇 FigmaController initialized");
-    this._stateService.setState(StateNames.CURRENT_SELECTION, figma.currentPage.selection.map(serializeNode));
   }
 
   addListeners() {
@@ -30,6 +29,8 @@ class FigmaController {
   init() {
     figma.showUI(__html__, { themeColors: true, width: widthSmall, height: heightSmall });
     this.addListeners();
+    console.log("🍇🍇 FigmaController initialized");
+    this._stateService.setState(StateNames.CURRENT_SELECTION, figma.currentPage.selection.map(serializeNode));
   }
 
   async handleMessage(msg) {
@@ -84,6 +85,7 @@ class FigmaController {
       this._stateService.setState(StateNames.LOADING, false);
       figma.ui.postMessage({ type: 'loading-update', loading: false });
       this.setEditorType(figma.editorType);
+      this.getVariantProps();
     }, 1000);
   }
 
@@ -102,6 +104,19 @@ class FigmaController {
     this._stateService.setState(StateNames.EDITOR_TYPE, editorType);
     figma.ui.postMessage({ type: 'editor-type', editor: editorType });
   }
+
+  getVariantProps() {
+    const selection = figma.currentPage.selection;
+    selection.forEach(node => {
+      if (node.type === 'COMPONENT_SET') {
+        const serializedNode = serializeNode(node);
+        const variantProps = calculateVariantProperties(serializedNode);
+        this._stateService.setState(StateNames.VARIANT_PROPERTIES, variantProps);
+        figma.ui.postMessage({ type: 'variant-properties', variantProperties: variantProps });
+      }
+    });
+  }
+
 }
 
 export const figmaController = new FigmaController();

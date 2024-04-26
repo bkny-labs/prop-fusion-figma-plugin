@@ -6,7 +6,13 @@ export class StateService {
   public states$: Observable<Record<StateNames, any>>;
 
   constructor() {
-    const appState = { [StateNames.CURRENT_SELECTION]: [], [StateNames.SNIPPET]: '', [StateNames.LOADING]: false, [StateNames.EDITOR_TYPE]: 'figma'};
+    const appState = { 
+      [StateNames.CURRENT_SELECTION]: [], 
+      [StateNames.SNIPPET]: '', 
+      [StateNames.LOADING]: false, 
+      [StateNames.EDITOR_TYPE]: 'figma',
+      [StateNames.VARIANT_PROPERTIES]: {}
+    }
     this.statesSubject = new BehaviorSubject(appState);
   }
 

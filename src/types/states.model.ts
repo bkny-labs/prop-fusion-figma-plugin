@@ -5,6 +5,7 @@ export enum StateNames {
   SNIPPET = "codeSnippet",
   LOADING = "loading",
   EDITOR_TYPE = "editorType",
+  VARIANT_PROPERTIES = "variantProperties",
 }
 
 export interface SelectionItem {

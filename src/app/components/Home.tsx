@@ -8,6 +8,8 @@ import { version } from '../../../package.json';
 import { SiBuymeacoffee, SiGooglegemini } from 'react-icons/si';
 import { saveAs } from 'file-saver';
 import { TbHandStop } from "react-icons/tb";
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { okaidia } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 const Home: React.FC = () => {
   const [currentSelection, setCurrentSelection] = useState([]);
@@ -18,6 +20,7 @@ const Home: React.FC = () => {
   const [readyToGenerate, setReadyToGenerate] = useState(false);
   const [isAiChecked, setIsAiChecked] = useState(false);
   const [isDevMode, setIsDevMode] = useState(false);
+  const [variantProperties, setVariantProperties] = useState({});
 
   useEffect(() => {
     parent.postMessage({ pluginMessage: { type: 'get-current-selection' } }, '*');
@@ -56,6 +59,10 @@ const Home: React.FC = () => {
         setIsDevMode(message.editor === 'dev');
       }
 
+      if (message.type === 'variant-properties') {
+        setVariantProperties(message.variantProperties);
+      }
+
     };
 
     window.addEventListener('message', handleMessage);
@@ -74,6 +81,11 @@ const Home: React.FC = () => {
     saveAs(blob, currentSelection[0].name.replace(/\s+/g, '') + 'Component.json');
   }, [currentSelection]);
 
+  const handleDownloadVariantProperties = useCallback(() => {
+  const blob = new Blob([JSON.stringify(variantProperties, null, 2)], { type: 'application/json' });
+  saveAs(blob, currentSelection[0].name.replace(/\s+/g, '') + 'variantProperties.json');
+}, [variantProperties]);
+
   return (
     <>
     {loading ? <p>Loading...</p> : (
@@ -85,7 +97,7 @@ const Home: React.FC = () => {
               {!codeSnippet && (
                 <div>
                   {currentSelection.length === 1 ? (
-                    renderSelectionDetails(currentSelection, isAiChecked, isDevMode)
+                    renderSelectionDetails(currentSelection, isAiChecked, isDevMode, variantProperties)
                   ) : (
                     <></>
                   )}
@@ -144,8 +156,9 @@ const Home: React.FC = () => {
               </button>
               ): 
               <>
-                <div>
-                  <button onClick={handleDownloadJson}><MdOutlineFileDownload /> Download {currentSelection[0].name.replace(/\s+/g, '') + 'Component.json'}</button>
+                <div className="button-group">
+                  <button onClick={handleDownloadJson}><MdOutlineFileDownload /> Component.json</button>
+                  <button onClick={handleDownloadVariantProperties}><MdOutlineFileDownload /> VariantProps.json</button> 
                 </div>
                 <div className="checkbox-container">
                   {/* <input 
@@ -189,7 +202,7 @@ const Home: React.FC = () => {
   );
 }
 
-const renderSelectionDetails = (nodes, isAiChecked, isDevMode) => {
+const renderSelectionDetails = (nodes, isAiChecked, isDevMode, variantProperties) => {
   return (nodes || []).map((node, index) => (
     <>
       <div key={index} className={`component-content ${isDevMode ? 'component-content--devMode' : ''}`}>
@@ -247,7 +260,7 @@ const renderSelectionDetails = (nodes, isAiChecked, isDevMode) => {
           </table>
         </div>
 
-        <h3>Property Definitions ({Object.keys(node.componentPropertyDefinitions).length})</h3>    
+        <h3>Property Definitions ({Object.keys(node.componentPropertyDefinitions).length})</h3>
         <table className="custom-table">
           <thead>
             <tr>
@@ -258,7 +271,7 @@ const renderSelectionDetails = (nodes, isAiChecked, isDevMode) => {
             </tr>
           </thead>
           <tbody>
-            {Object.entries(node?.componentPropertyDefinitions || {}).map(([key, value]: [string, { type: string; defaultValue: any; variantOptions?: string[]; preferredValues?: string[] }], idx) => (
+            {Object.entries(node && node?.componentPropertyDefinitions || {}).map(([key, value]: [string, { type: string; defaultValue: any; variantOptions?: string[]; preferredValues?: string[] }], idx) => (
               <tr key={idx}>
                 <td>{key.split('#')[0].replace(/\s+/g, '')}</td>
                 <td>{value ? value.type: ''}</td>
@@ -268,6 +281,18 @@ const renderSelectionDetails = (nodes, isAiChecked, isDevMode) => {
             ))}
           </tbody>
         </table>
+
+        <h3>Variant Properties</h3>
+        <div className="code-container">
+          <SyntaxHighlighter
+            language="json" style={okaidia}>
+              {JSON.stringify(variantProperties, null, 2) || ''}
+          </SyntaxHighlighter>
+        </div>
+        {/* <CodeSnippet 
+          code={variantProperties  || ''}
+          language="json"
+        /> */}
       </div>
     </>
   ));
