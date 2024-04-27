@@ -184,16 +184,16 @@ const Home: React.FC = () => {
         )}
         <div className="version">
             <div className="links">
-              <a href="https://github.com/bkny-labs/prop-fusion-figma-plugin/blob/main/CHANGELOG.md" target="_blank" class="tooltip" data-tooltip="Changelog">
+              <a href="https://github.com/bkny-labs/prop-fusion-figma-plugin/blob/main/CHANGELOG.md" target="_blank" className="tooltip" data-tooltip="Changelog">
                 v{version}
               </a>
-              <a href="https://github.com/bkny-labs/prop-fusion-figma-plugin/wiki/PropFusion-User-Guide" target="_blank" class="tooltip" data-tooltip="Docs">
+              <a href="https://github.com/bkny-labs/prop-fusion-figma-plugin/wiki/PropFusion-User-Guide" target="_blank" className="tooltip" data-tooltip="Docs">
                 <FaBook />
               </a>
-              <a href="https://github.com/bkny-labs/prop-fusion-figma-plugin" target="_blank" class="tooltip" data-tooltip="Github">
+              <a href="https://github.com/bkny-labs/prop-fusion-figma-plugin" target="_blank" className="tooltip" data-tooltip="Github">
                 <FaGithub />
               </a>
-              <a href="https://buymeacoffee.com/m42na" target="_blank" class="tooltip" data-tooltip="Donate">
+              <a href="https://buymeacoffee.com/m42na" target="_blank" className="tooltip" data-tooltip="Donate">
                 <SiBuymeacoffee />
               </a>
             </div> 
