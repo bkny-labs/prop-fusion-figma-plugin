@@ -5,7 +5,7 @@
 This Figma Plugin translates component set props from Figma to Typescript, React, Angular, Vue, Flutter and more.
 
 - 📥 [Download from Figma Community](https://www.google.com/)
-- 📖 [Visit the User Guide](https://github.com/bkny-labs/prop-fusion-figma-plugin/wiki) to learn more about using the Community version of the plugin.
+- 📖 [Visit the User Guide](https://github.com/bkny-labs/prop-fusion-figma-plugin/wiki/User-Guide) to learn more about using the Community version of the plugin.
 
 
 ## Running the plugin locally
