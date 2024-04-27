@@ -2,11 +2,13 @@
 
 # PropFusion Figma Plugin
 
-This Figma Plugin translates component set props from Figma to Typescript, React, Angular, Flutter.
+This Figma Plugin translates component set props from Figma to Typescript, React, Angular, Vue, Flutter and more.
 
-User guide and documentation coming soon..
+- 📥 [Download from Figma Community](https://www.google.com/)
+- 📖 [Visit the User Guide](https://github.com/bkny-labs/prop-fusion-figma-plugin/wiki) to learn more about using the Community version of the plugin.
 
-## Quickstart
+
+## Running the plugin locally
 
 - Run `yarn` to install dependencies.
 - Run `yarn build:watch` to start webpack in watch mode.
