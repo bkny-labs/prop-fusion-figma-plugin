@@ -3,20 +3,19 @@ import logo from '../assets/logo.png';
 import '../styles/ui.css';
 import Tabs from './Tabs';
 import { MdOutlineFileDownload, MdOutlineSkipPrevious } from "react-icons/md";
-import { FaCode, FaGithub } from 'react-icons/fa';
+import { FaBook, FaCode, FaGithub, FaSpinner } from 'react-icons/fa';
 import { version } from '../../../package.json';
 import { SiBuymeacoffee, SiGooglegemini } from 'react-icons/si';
 import { saveAs } from 'file-saver';
 import { TbHandStop } from "react-icons/tb";
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { okaidia } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import CodeSnippet from './CodeSnippet';
 
 const Home: React.FC = () => {
   const [currentSelection, setCurrentSelection] = useState([]);
   const [codeSnippet, setCodeSnippet] = useState(null);
   const [validSelection, setValidSelection] = useState(null);
   const [nothingSelected, setNothingSelected] = useState(true);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [readyToGenerate, setReadyToGenerate] = useState(false);
   const [isAiChecked, setIsAiChecked] = useState(false);
   const [isDevMode, setIsDevMode] = useState(false);
@@ -32,6 +31,7 @@ const Home: React.FC = () => {
       }
 
       if (message.type === 'selection-update') {
+        setLoading(true);
         setValidSelection(message.selection.some(item => item.type === 'COMPONENT_SET'));
         setCurrentSelection(message.selection);
         setReadyToGenerate(false);
@@ -88,7 +88,6 @@ const Home: React.FC = () => {
 
   return (
     <>
-    {loading ? <p>Loading...</p> : (
     <div className="container">
       <div className="top">
         {validSelection && currentSelection.length === 1 ? (
@@ -97,7 +96,7 @@ const Home: React.FC = () => {
               {!codeSnippet && (
                 <div>
                   {currentSelection.length === 1 ? (
-                    renderSelectionDetails(currentSelection, isAiChecked, isDevMode, variantProperties)
+                    renderSelectionDetails(loading, currentSelection, isAiChecked, isDevMode, variantProperties)
                   ) : (
                     <></>
                   )}
@@ -105,6 +104,7 @@ const Home: React.FC = () => {
               )}
               {codeSnippet && (
                 <>
+                  <h3>Code Templates <span className="beta">BETA</span></h3>
                   <Tabs style={{ marginBottom: '20px' }} codeSnippets={codeSnippet as any} />
                 </>
               )}
@@ -158,7 +158,7 @@ const Home: React.FC = () => {
               <>
                 <div className="button-group">
                   <button onClick={handleDownloadJson}><MdOutlineFileDownload /> Component.json</button>
-                  <button onClick={handleDownloadVariantProperties}><MdOutlineFileDownload /> VariantProps.json</button> 
+                  <button onClick={handleDownloadVariantProperties}><MdOutlineFileDownload /> VariantProps.json <span className="beta">BETA</span></button> 
                 </div>
                 <div className="checkbox-container">
                   {/* <input 
@@ -176,7 +176,7 @@ const Home: React.FC = () => {
             {isAiChecked ? (
               <button id="generate" onClick={() => console.log('GENERATE MAGIC AI WOOP')}><SiGooglegemini /> Generate Component</button>
             ) : (
-              <button id="create" onClick={handleRequestSnippet}><FaCode /> Create Component</button>
+              <button id="create" onClick={handleRequestSnippet}><FaCode /> Create Code Templates</button>
             )}
           </div>
         ) : (
@@ -184,25 +184,27 @@ const Home: React.FC = () => {
         )}
         <div className="version">
             <div className="links">
-              <a href="https://github.com/bkny-labs/prop-fusion-figma-plugin/blob/main/CHANGELOG.md" target="_blank">
+              <a href="https://github.com/bkny-labs/prop-fusion-figma-plugin/blob/main/CHANGELOG.md" target="_blank" class="tooltip" data-tooltip="Changelog">
                 v{version}
               </a>
-              <a href="https://github.com/bkny-labs/prop-fusion-figma-plugin" target="_blank">
+              <a href="https://github.com/bkny-labs/prop-fusion-figma-plugin/wiki/PropFusion-User-Guide" target="_blank" class="tooltip" data-tooltip="Docs">
+                <FaBook />
+              </a>
+              <a href="https://github.com/bkny-labs/prop-fusion-figma-plugin" target="_blank" class="tooltip" data-tooltip="Github">
                 <FaGithub />
               </a>
-              <a href="https://buymeacoffee.com/m42na" target="_blank">
+              <a href="https://buymeacoffee.com/m42na" target="_blank" class="tooltip" data-tooltip="Donate">
                 <SiBuymeacoffee />
               </a>
             </div> 
         </div>
       </div>
     </div>
-      )}
     </>
   );
 }
 
-const renderSelectionDetails = (nodes, isAiChecked, isDevMode, variantProperties) => {
+const renderSelectionDetails = (loading, nodes, isAiChecked, isDevMode, variantProperties) => {
   return (nodes || []).map((node, index) => (
     <>
       <div key={index} className={`component-content ${isDevMode ? 'component-content--devMode' : ''}`}>
@@ -221,7 +223,7 @@ const renderSelectionDetails = (nodes, isAiChecked, isDevMode, variantProperties
         }
 
         <div className="component-info">
-        <h3>Component Details</h3>
+        <h3>Component Set Details</h3>
         <table className="custom-table">
           <tbody>
             <tr>
@@ -281,18 +283,24 @@ const renderSelectionDetails = (nodes, isAiChecked, isDevMode, variantProperties
             ))}
           </tbody>
         </table>
-
-        <h3>Variant Properties</h3>
-        <div className="code-container">
-          <SyntaxHighlighter
-            language="json" style={okaidia}>
-              {JSON.stringify(variantProperties, null, 2) || ''}
-          </SyntaxHighlighter>
-        </div>
-        {/* <CodeSnippet 
-          code={variantProperties  || ''}
-          language="json"
-        /> */}
+        {isDevMode && (
+        <>
+        <h3>Variant Properties <span className="beta">BETA</span>
+        </h3>
+          {loading ? 
+            <div className="loading">
+              <FaSpinner className="spinner" />
+            </div> : (
+            <div className="code-container code-container--maxHeight">
+              <CodeSnippet 
+                    code={JSON.stringify(variantProperties, null, 2) || ''}
+                    language="json" 
+                    showLineNumbers={true}
+                />
+            </div>
+            )}
+        </>
+        )}
       </div>
     </>
   ));
