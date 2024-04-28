@@ -65,14 +65,14 @@ class FigmaController {
       case 'copy-failure':
         this._messageService.handleCopyNotification(msg);
         break;
-      case 'resize':
-        this.resizeWindow(msg.width, msg.height);
-        break;
       case 'get-current-selection':
         this.handleSelectionChange();
         break;
       case 'generate-code-snippets':
         this._messageService.generateSnippet(msg);
+        break;
+      case 'resize':
+        this.resizeWindow(msg.width, msg.height);
         break;
       case 'send-prompt-to-gemini':
         this._geminiService.sendPromptToGemini(msg.prompt)
@@ -82,6 +82,9 @@ class FigmaController {
           .catch(error => {
             logger.error('🦄🦄 Error sending prompt to Gemini:', error);
           });
+        break;
+      case 'set-config':
+        this.setConfig(msg.config);
         break;
       default:
         logger.error('Unhandled message type:', msg.type);
@@ -106,10 +109,10 @@ class FigmaController {
       }
 
       this._stateService.setSlice(StateNames.CURRENT_SELECTION, currentNode);
-
-      this.setEditorType(figma.editorType);
       this.getVariantProps();
+      this.setEditorType(figma.editorType);
     } catch (error) {
+      figma.ui.resize(widthSmall, heightSmall);
       logger.error('⛔️⛔️ Error handling selection change:', error);
       figma.ui.postMessage({ type: 'loading-update', loading: false });
     } finally {
@@ -120,19 +123,35 @@ class FigmaController {
   init() {
     figma.showUI(__html__, { themeColors: true, width: widthSmall, height: heightSmall });
     this.addListeners();
+    this.setEditorType(figma.editorType);
     logger.info('🍇🍇 FigmaController initialized');
     this._stateService.setSlice(StateNames.CURRENT_SELECTION, figma.currentPage.selection.map(serializeNode));
   }
 
   resizeWindow = async (width: number, height: number): Promise<void> => {
-    logger.log('͍͍͍⃕🏹🏹 THE WINDOW SHOULD BE RESIZING ON DRAG TO', width, height);
+    logger.log('͍͍͍⃕🏹🏹 RESIZING ON DRAG TO', width, height);
     figma.ui.resize(width, height);
   };
 
   setEditorType(editorType: string) {
-    this._stateService.setSlice(StateNames.EDITOR_TYPE, editorType);
     figma.ui.postMessage({ type: 'editor-type', editor: editorType });
+    // this._stateService.setSlice(StateNames.EDITOR_TYPE, editorType);
   }
+
+  setConfig(config: any) {
+    const selections = figma.currentPage.selection;
+    const currentNode = selections.map(node => {
+    const serializedNode = serializeNode(node);
+    return {
+      ...serializedNode,
+      config: {
+        framework: config.framework || "react",
+        typescript: config.typescript || true,
+        styles: config.styles || "css"
+      }
+    };
+  });
+}
 
 }
 

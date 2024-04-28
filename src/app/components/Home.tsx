@@ -1,14 +1,15 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import logo from '../assets/logo.png';
-import '../styles/ui.css';
+import '../styles/ui.scss';
 import Tabs from './Tabs';
-import { MdOutlineFileDownload, MdOutlineSkipPrevious } from "react-icons/md";
+import { MdOutlineFileDownload, MdOutlineSkipPrevious, MdSkipNext } from "react-icons/md";
 import { FaBook, FaCode, FaGithub, FaSpinner } from 'react-icons/fa';
 import pkg from '../../../package.json';
 import { SiBuymeacoffee, SiGooglegemini } from 'react-icons/si';
 import { saveAs } from 'file-saver';
 import { TbHandStop } from "react-icons/tb";
 import CodeSnippet from './CodeSnippet';
+import ConfigForm from './ConfigForm';
 
 const Home: React.FC = () => {
   const [currentSelection, setCurrentSelection] = useState([]);
@@ -20,8 +21,6 @@ const Home: React.FC = () => {
   const [isAiChecked, setIsAiChecked] = useState(false);
   const [isDevMode, setIsDevMode] = useState(false);
   const [variantProperties, setVariantProperties] = useState({});
-
-
 
   useEffect(() => {
     parent.postMessage({ pluginMessage: { type: 'get-current-selection' } }, '*');
@@ -58,6 +57,7 @@ const Home: React.FC = () => {
           break;
 
         case 'editor-type':
+          console.log('Editor type updated??', message.editor);
           setIsDevMode(message.editor === 'dev');
           break;
 
@@ -98,7 +98,16 @@ const Home: React.FC = () => {
         {validSelection && currentSelection.length === 1 ? (
           <>
             <div className="content">
-              {!codeSnippet && (
+              { readyToGenerate && (
+                <>
+                <div className="alert component">
+                  <h3>Component Configuration</h3>
+                  <p>Customize your code generation options.</p>
+                </div>
+                <ConfigForm />
+                </>
+              )}
+              {!codeSnippet && !readyToGenerate && (
                 <div>
                   {currentSelection.length === 1 ? (
                     renderSelectionDetails(loading, currentSelection, isAiChecked, isDevMode, variantProperties)
@@ -155,7 +164,7 @@ const Home: React.FC = () => {
       <div className="bottom">
         {validSelection && currentSelection.length === 1 ? (
           <div className="actions">
-            {codeSnippet ? (
+            {codeSnippet || readyToGenerate ? (
               <button id="goBack" onClick={() => setCodeSnippet(null)}>
               <MdOutlineSkipPrevious /> Back
               </button>
@@ -165,23 +174,20 @@ const Home: React.FC = () => {
                   <button onClick={handleDownloadJson}><MdOutlineFileDownload /> Component.json</button>
                   <button onClick={handleDownloadVariantProperties}><MdOutlineFileDownload /> VariantProps.json <span className="beta">BETA</span></button> 
                 </div>
-                <div className="checkbox-container">
-                  {/* <input 
-                    type="checkbox" 
-                    id="generateWithAI" 
-                    name="generateWithAI"
-                    checked={isAiChecked} 
-                    // disabled={true}
-                    onChange={() => setIsAiChecked(!isAiChecked)}
-                  />
-                  <label htmlFor="generateWithAI">Use AI</label> */}
-                </div>
                 </>
               }
             {isAiChecked ? (
               <button id="generate" onClick={() => console.log('GENERATE MAGIC AI WOOP')}><SiGooglegemini /> Generate Component</button>
             ) : (
-              <button id="create" onClick={handleRequestSnippet}><FaCode /> Create Code Templates</button>
+              <>
+                {
+                  readyToGenerate ? (
+                    <button id="create" onClick={handleRequestSnippet}><FaCode /> Create Code Templates</button>
+                  ) : (
+                    <button id="create" onClick={() => setReadyToGenerate(true)}>Continue <MdSkipNext /></button>
+                  )
+                }
+              </>
             )}
           </div>
         ) : (

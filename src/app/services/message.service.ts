@@ -19,8 +19,6 @@ export class MessageService {
       const componentNameTypes = component.name.replace(/\s+/g, '') + 'Types';
       const cssFileName = component.name.toLowerCase().replace(/\s+/g, '-') + '.css';
       const variantProps = Object.entries(component.componentPropertyDefinitions);
-      const variantProperties = stateService.getValue(StateNames.VARIANT_PROPERTIES);
-      console.log('🍇🍇 Variant Properties:', variantProperties);
 
       const propTypes = variantProps
         .map(([key, value]) => {
