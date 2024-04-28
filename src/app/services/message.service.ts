@@ -19,6 +19,8 @@ export class MessageService {
       const componentNameTypes = component.name.replace(/\s+/g, '') + 'Types';
       const cssFileName = component.name.toLowerCase().replace(/\s+/g, '-') + '.css';
       const variantProps = Object.entries(component.componentPropertyDefinitions);
+      const variantProperties = stateService.getValue(StateNames.VARIANT_PROPERTIES);
+      console.log('🍇🍇 Variant Properties:', variantProperties);
 
       const propTypes = variantProps
         .map(([key, value]) => {
@@ -99,8 +101,8 @@ export class MessageService {
       if (typeof figma.ui.postMessage === 'function') {
         figma.ui.postMessage({ type: 'deliver-snippet', code: snippet });
       }
-      if (typeof stateService.setState === 'function') {
-        stateService.setState(StateNames.SNIPPET, snippet);
+      if (typeof stateService.setSlice === 'function') {
+        stateService.setSlice(StateNames.SNIPPET, snippet);
       }
     } else {
       figma.ui.postMessage({ type: 'error', message: 'No component set selected or node is not a component set.' });

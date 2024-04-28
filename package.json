@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.8.0",
+    "@types/lodash": "^4.17.0",
+    "deep-diff": "^1.0.2",
     "file-saver": "^2.0.5",
     "lodash": "^4.17.21",
     "lodash.debounce": "^4.0.8",

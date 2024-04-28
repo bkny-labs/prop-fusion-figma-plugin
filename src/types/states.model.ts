@@ -1,10 +1,16 @@
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch } from "react";
+
+interface SetSliceAction<T> {
+  type: 'SET_SLICE';
+  payload: T;
+}
 
 export enum StateNames {
   CURRENT_SELECTION = "currentSelection",
   SNIPPET = "codeSnippet",
   LOADING = "loading",
   EDITOR_TYPE = "editorType",
+  VARIANT_PROPERTIES = "variantProperties",
 }
 
 export interface SelectionItem {
@@ -19,5 +25,5 @@ export interface SelectionItem {
 export interface AppState {
   currentSelection: SelectionItem[];
   codeSnippet: string;
-  updateState: Dispatch<SetStateAction<any>>;
+  updateState: Dispatch<SetSliceAction<any>>;
 }

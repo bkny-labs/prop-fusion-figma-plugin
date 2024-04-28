@@ -1,8 +1,11 @@
+import { debounce } from 'lodash';
 import { GeminiService } from '../app/services/gemini.service';
 import { MessageService } from '../app/services/message.service';
 import { StateService } from '../app/services/state.service';
+import { calculateVariantProperties } from '../app/utils/component-prop-diff';
 import { serializeNode } from '../app/utils/serializer';
 import { StateNames } from '../types/states.model';
+import { logger } from '../app/utils/logger';
 
 export const widthLarge = 650;
 export const heightLarge = 650;
@@ -18,8 +21,7 @@ class FigmaController {
     this._stateService = new StateService();
     this._geminiService = new GeminiService();
     this.init();
-    console.log("🍇🍇 FigmaController initialized");
-    this._stateService.setState(StateNames.CURRENT_SELECTION, figma.currentPage.selection.map(serializeNode));
+    this.getVariantProps = debounce(this.getVariantProps.bind(this), 300);
   }
 
   addListeners() {
@@ -27,13 +29,38 @@ class FigmaController {
     figma.on('selectionchange', this.handleSelectionChange.bind(this));
   }
 
-  init() {
-    figma.showUI(__html__, { themeColors: true, width: widthSmall, height: heightSmall });
-    this.addListeners();
+  async copyToClipboard(code: string) {
+    try {
+      await navigator.clipboard.writeText(code);
+      parent.postMessage({ pluginMessage: { type: 'copy-success', message: 'Successfully copied to clipboard!' } }, '*');
+      logger.info('📋📋 Copied to clipboard');
+    } catch (err) {
+      logger.error('⛔️⛔️ Failed to copy:', err);
+      parent.postMessage({ pluginMessage: { type: 'copy-failure', message: 'Failed to copy!' } }, '*');
+    }
+  }
+
+  getVariantProps() {
+    try {
+      const selection = figma.currentPage.selection;
+      selection.forEach(node => {
+        if (node.type === 'COMPONENT_SET') {
+          const serializedNode = serializeNode(node);
+          let variantProps = calculateVariantProperties(serializedNode);
+          figma.ui.postMessage({ type: 'variant-properties', variantProperties: variantProps });
+        }
+      });
+
+    } catch (error) {
+      logger.error('⛔️⛔️ Error getting variant properties:', error);
+    }
   }
 
   async handleMessage(msg) {
     switch (msg.type) {
+      case 'copy':
+        this.copyToClipboard(msg.code);
+        break;
       case 'copy-success':
       case 'copy-failure':
         this._messageService.handleCopyNotification(msg);
@@ -50,58 +77,63 @@ class FigmaController {
       case 'send-prompt-to-gemini':
         this._geminiService.sendPromptToGemini(msg.prompt)
           .then(responseText => {
-            console.log('🍇🍇 Gemini response:', responseText);
-            // Now you can use responseText
+            logger.log('🦄🦄 Gemini response:', responseText);
           })
           .catch(error => {
-            console.error('Error sending prompt to Gemini:', error);
+            logger.error('🦄🦄 Error sending prompt to Gemini:', error);
           });
         break;
       default:
-        console.error('Unhandled message type:', msg.type);
+        logger.error('Unhandled message type:', msg.type);
     }
   }
 
-  handleSelectionChange() {
-    this._stateService.setState(StateNames.LOADING, true);
-    const selections = figma.currentPage.selection;
-    const currentNode = selections.map(serializeNode);
-    figma.ui.postMessage({ type: 'selection-update', selection: currentNode });
-    figma.ui.postMessage({ type: 'send-prompt-to-gemini', prompt: 'Create a component out of these variant property groups: Variant, Size' });
+  async handleSelectionChange() {
+    try {
+      figma.ui.postMessage({ type: 'loading-update', loading: true });
 
-    const isComponentSetSelected = selections.some(node => node.type === 'COMPONENT_SET');
-    if (!isComponentSetSelected) {
-      this._stateService.setState(StateNames.CURRENT_SELECTION, currentNode); // Set current node even if it's not a component set
-      this._stateService.clearState(StateNames.SNIPPET);
-      figma.ui.resize(widthSmall, heightSmall);
-    } else if(selections.length === 1) {
-      figma.ui.resize(widthLarge, heightLarge);
-    }
+      const selections = figma.currentPage.selection;
+      const currentNode = selections.map(serializeNode);
+      figma.ui.postMessage({ type: 'selection-update', selection: currentNode });
 
-    this._stateService.setState(StateNames.CURRENT_SELECTION, currentNode);
-    this._stateService.setState(StateNames.LOADING, false);
-    setTimeout(() => {
-      this._stateService.setState(StateNames.LOADING, false);
-      figma.ui.postMessage({ type: 'loading-update', loading: false });
+      const isComponentSetSelected = selections.some(node => node.type === 'COMPONENT_SET');
+      if (!isComponentSetSelected) {
+        this._stateService.setSlice(StateNames.CURRENT_SELECTION, currentNode);
+        this._stateService.clearState(StateNames.SNIPPET);
+        figma.ui.resize(widthSmall, heightSmall);
+      } else if(selections.length === 1) {
+        figma.ui.resize(widthLarge, heightLarge);
+      }
+
+      this._stateService.setSlice(StateNames.CURRENT_SELECTION, currentNode);
+
       this.setEditorType(figma.editorType);
-    }, 1000);
+      this.getVariantProps();
+    } catch (error) {
+      logger.error('⛔️⛔️ Error handling selection change:', error);
+      figma.ui.postMessage({ type: 'loading-update', loading: false });
+    } finally {
+      figma.ui.postMessage({ type: 'loading-update', loading: false });
+    }
   }
 
-  getCurrentSelection() {
-    const selections = figma.currentPage.selection;
-    const currentNode = selections.map(serializeNode);
-    figma.ui.postMessage({ type: 'selection-update', selection: currentNode });
+  init() {
+    figma.showUI(__html__, { themeColors: true, width: widthSmall, height: heightSmall });
+    this.addListeners();
+    logger.info('🍇🍇 FigmaController initialized');
+    this._stateService.setSlice(StateNames.CURRENT_SELECTION, figma.currentPage.selection.map(serializeNode));
   }
 
   resizeWindow = async (width: number, height: number): Promise<void> => {
-    console.log('THE WINDOW SHOULD BE RESIZING ON DRAG TO', width, height);
+    logger.log('͍͍͍⃕🏹🏹 THE WINDOW SHOULD BE RESIZING ON DRAG TO', width, height);
     figma.ui.resize(width, height);
   };
 
   setEditorType(editorType: string) {
-    this._stateService.setState(StateNames.EDITOR_TYPE, editorType);
+    this._stateService.setSlice(StateNames.EDITOR_TYPE, editorType);
     figma.ui.postMessage({ type: 'editor-type', editor: editorType });
   }
+
 }
 
 export const figmaController = new FigmaController();

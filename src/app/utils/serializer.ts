@@ -1,3 +1,16 @@
+function rgbToHex(r, g, b) {
+  return "#" + [r, g, b].map(x => {
+    const hex = Math.round(x * 255).toString(16);
+    return hex.length === 1 ? "0" + hex : hex;
+  }).join('');
+}
+
+// Should do the lookup for bound variables somewhere else
+// function getVariableName(variableId) {
+//   const variable = figma.getLocalPaintStyles().find(style => style.id === variableId);
+//   return variable ? variable.name : null;
+// }
+
 export function serializeNode(node, depth = 0): any {
   const componentSet = node.type === 'COMPONENT_SET' && depth === 0;
   const componentPropertyDefinitionNames = componentSet && node.componentPropertyDefinitions ? Object.keys(node.componentPropertyDefinitions) : [];
@@ -18,14 +31,96 @@ export function serializeNode(node, depth = 0): any {
 
     if (node.children) {
       serializedChildren = node.children.map(child => {
-        // Serialize child values
-        const serializedChildValues = {};
-        for (const key in child.values) {
-          serializedChildValues[key] = child.values[key];
-        }
+        // Ignore the child's children
+        const { children, ...childWithoutChildren } = child;
 
-        // Return a new object with all properties of child and the serialized values
-        return { ...child, values: serializedChildValues };
+        return { ...childWithoutChildren, 
+
+          // id: child.id,
+          type: child.type,
+          name: child.name,
+          // devStatus: child.devStatus,
+          props: {
+            opacity: child.opacity,
+            backgrounds: Array.isArray(child.backgrounds) ? child.backgrounds.map(background => ({
+              type: background.type, 
+              visible: background.visible,
+              opacity: background.opacity,
+              blendMode: background.blendMode,
+              color: rgbToHex(background.color.r, background.color.g, background.color.b),
+              boundVariables: background.boundVariables,
+            })) : [],
+            blendMode: child.blendMode,
+            maskType: child.maskType,
+            width: child.width,
+            height: child.height,
+            rotation: child.rotation,
+            minWidth: child.minWidth,
+            maxWidth: child.maxWidth,
+            minHeight: child.minHeight,
+            maxHeight: child.maxHeight,
+            fills: child.fills ? child.fills.map(fill => ({
+              type: fill.type, 
+              visible: fill.visible,
+              opacity: fill.opacity,
+              blendMode: fill.blendMode,
+              color: rgbToHex(fill.color.r, fill.color.g, fill.color.b),
+              boundVariables: fill.boundVariables,
+            })) : [],
+            strokes: child.strokes ? child.strokes.map(stroke => ({
+              type: stroke.type, 
+              visible: stroke.visible,
+              opacity: stroke.opacity,
+              blendMode: stroke.blendMode,
+              color: rgbToHex(stroke.color.r, stroke.color.g, stroke.color.b),
+              boundVariables: stroke.boundVariables,
+            })) : [],
+            strokeWeight: child.strokeWeight,
+            strokeAlign: child.strokeAlign,
+            strokeJoin: child.strokeJoin,
+            dashPattern: child.dashPattern,
+            strokeCap: child.strokeCap,
+            strokeMiterLimit: child.strokeMiterLimit,
+            // fillGeometry: child.fillGeometry,
+            // strokeGeometry: child.strokeGeometry,
+            // cornerSmoothing: child.cornerSmoothing,
+            borderRadius: {
+              all: child.cornerRadius,
+              topLeft: child.topLeftRadius,
+              topRight: child.topRightRadius,
+              bottomLeft: child.bottomLeftRadius,
+              bottomRight: child.bottomRightRadius,
+            },
+            padding: {
+              left: child.paddingLeft,
+              right: child.paddingRight,
+              top: child.paddingTop,
+              bottom: child.paddingBottom,
+            },
+            primaryAxisAlignItems: child.primaryAxisAlignItems,
+            counterAxisAlignItems: child.counterAxisAlignItems,
+            primaryAxisSizingMode: child.primaryAxisSizingMode,
+            // layoutWrap: child.layoutWrap,
+            counterAxisSpacing: child.counterAxisSpacing,
+            counterAxisAlignContent: child.counterAxisAlignContent,
+            strokeTopWeight: child.strokeTopWeight,
+            strokeBottomWeight: child.strokeBottomWeight,
+            strokeLeftWeight: child.strokeLeftWeight,
+            strokeRightWeight: child.strokeRightWeight,
+            expanded: child.expanded,
+            constraints: child.constraints,
+            layoutMode: child.layoutMode,
+            counterAxisSizingMode: child.counterAxisSizingMode,
+            itemSpacing: child.itemSpacing,
+            overflowDirection: child.overflowDirection,
+            // numberOfFixedChildren: child.numberOfFixedChildren,
+            overlayPositionType: child.overlayPositionType,
+            overlayBackground: child.overlayBackground,
+            overlayBackgroundInteraction: child.overlayBackgroundInteraction,
+            // itemReverseZIndex: child.itemReverseZIndex,
+            // strokesIncludedInLayout: child.strokesIncludedInLayout,
+          }
+        };
       });
     }
 
@@ -40,12 +135,12 @@ export function serializeNode(node, depth = 0): any {
 
   return {
     id: node.id,
+    type: node.type,
     name: node.name,
     description: node.description,
     link: node.documentationLinks ? node.documentationLinks[0]?.uri : null,
-    type: node.type,
     defaultVariantName: node.defaultVariant ? node.defaultVariant.name : null,
     componentPropertyDefinitions: componentSet ? componentPropertyDefinitions : {},
-    children: Array.isArray(serializedChildren) && depth < 1 ? serializedChildren.map((child) => serializeNode(child, depth + 1)) : [],
-    variantGroupProperties: componentSet && depth < 1 ? variantGroupProperties : {},  };
+    children: serializedChildren,
+    variantGroupProperties: componentSet && depth < 1 ? variantGroupProperties : {},  }
 }
