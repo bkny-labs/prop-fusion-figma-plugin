@@ -1,4 +1,9 @@
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch } from "react";
+
+interface SetSliceAction<T> {
+  type: 'SET_SLICE';
+  payload: T;
+}
 
 export enum StateNames {
   CURRENT_SELECTION = "currentSelection",
@@ -20,5 +25,5 @@ export interface SelectionItem {
 export interface AppState {
   currentSelection: SelectionItem[];
   codeSnippet: string;
-  updateState: Dispatch<SetStateAction<any>>;
+  updateState: Dispatch<SetSliceAction<any>>;
 }

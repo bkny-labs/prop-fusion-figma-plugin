@@ -1,37 +1,47 @@
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { StateNames } from '../../types/states.model';
+import { logger } from '../utils/logger';
 
 export class StateService {
-  private statesSubject: BehaviorSubject<Record<StateNames, any>>;
-  public states$: Observable<Record<StateNames, any>>;
+  private state: { [key in StateNames]?: BehaviorSubject<any> } = {};
 
   constructor() {
-    const appState = { 
+    const initialState = { 
       [StateNames.CURRENT_SELECTION]: [], 
       [StateNames.SNIPPET]: '', 
       [StateNames.LOADING]: false, 
       [StateNames.EDITOR_TYPE]: 'figma',
       [StateNames.VARIANT_PROPERTIES]: {}
     }
-    this.statesSubject = new BehaviorSubject(appState);
+    for (const key in initialState) {
+      this.state[key] = new BehaviorSubject(initialState[key]);
+    }
   }
 
-  getState(name: StateNames): any {
-    return this.statesSubject.value[name];
+  public getObservable(key: StateNames) {
+    return this.state[key];
   }
 
-  setState(name: StateNames, value: any): void {
-    const newState = { ...this.statesSubject.value, [name]: value };
-    this.statesSubject.next(newState);
-    console.log("🍌🍌 Set state:", name, value);
+  public getState() {
+    const stateValues: any = {};
+    for (const key in this.state) {
+      stateValues[key] = this.state[key]?.getValue();
+    }
+    return stateValues;
   }
 
-  clearState(name: StateNames): void {
-    this.setState(name, name === StateNames.CURRENT_SELECTION ? [] : '');
+  public getValue(key: StateNames) {
+    return this.state[key]?.getValue();
   }
 
-  getObservable(): Observable<Record<StateNames, any>> {
-    return this.statesSubject.asObservable();
+  public setSlice(key: StateNames, value: any) {
+    if (!this.state[key]) {
+      this.state[key] = new BehaviorSubject(value);
+    } else {
+      this.state[key].next(value);
+    }
+    figma.ui.postMessage({ type: 'state-update', key, value });
+    logger.log('🍌🍌 State updated:', key, value);
   }
 }
 
