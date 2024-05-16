@@ -35,10 +35,10 @@
   "resolved" "https://registry.npmjs.org/@discoveryjs/json-ext/-/json-ext-0.5.7.tgz"
   "version" "0.5.7"
 
-"@figma/plugin-typings@^1.50.0":
-  "integrity" "sha512-kwiuApuqgkIPbFKey459VspenqXlBcBoMTnTZdQ/Hk2N71BTOZ0cM5Xq3zbPW/bEQOYtGDpweWxcXYHLo19HxQ=="
-  "resolved" "https://registry.npmjs.org/@figma/plugin-typings/-/plugin-typings-1.57.1.tgz"
-  "version" "1.57.1"
+"@figma/plugin-typings@^1.92.0":
+  "integrity" "sha512-W02/uSt+n33Iro0/Goj+Dl1Fp+1i9+jjciw//BcBh0VOz2QzuiaurhftnboO8gKucOloBOROMbxe/Vylu4ItZw=="
+  "resolved" "https://registry.npmjs.org/@figma/plugin-typings/-/plugin-typings-1.92.0.tgz"
+  "version" "1.92.0"
 
 "@google/generative-ai@^0.8.0":
   "integrity" "sha512-O55FgK1Jvl2JuJP1cnRHEAM8A4Lr3yKtjQrCn2QXOXVT+L5+o/nFQcx0/oIo3oq1Kq9TjjgewXyb9BBrK+Wd0A=="

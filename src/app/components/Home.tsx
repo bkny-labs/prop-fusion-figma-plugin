@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import logo from '../assets/logo.png';
 import '../styles/ui.scss';
 import Tabs from './Tabs';
@@ -17,10 +17,15 @@ const Home: React.FC = () => {
   const [validSelection, setValidSelection] = useState(null);
   const [nothingSelected, setNothingSelected] = useState(true);
   const [loading, setLoading] = useState(true);
-  const [readyToGenerate, setReadyToGenerate] = useState(false);
   const [isAiChecked, setIsAiChecked] = useState(false);
   const [isDevMode, setIsDevMode] = useState(false);
   const [variantProperties, setVariantProperties] = useState({});
+  const formRef = useRef<{ handleSubmit: () => void } | null>(null);
+  const [currentStep, setCurrentStep] = useState(1);
+
+  const toggleStep = (step: number) => {
+    setCurrentStep(step);
+  };
 
   useEffect(() => {
     parent.postMessage({ pluginMessage: { type: 'get-current-selection' } }, '*');
@@ -35,7 +40,7 @@ const Home: React.FC = () => {
         case 'selection-update':
           setValidSelection(message.selection.some(item => item.type === 'COMPONENT_SET'));
           setCurrentSelection(message.selection);
-          setReadyToGenerate(false);
+          setCurrentStep(1);
 
           // If there's no selection, set codeSnippet to null
           if (message.selection.length === 0 || message.selection.length > 1) {
@@ -57,7 +62,6 @@ const Home: React.FC = () => {
           break;
 
         case 'editor-type':
-          console.log('Editor type updated??', message.editor);
           setIsDevMode(message.editor === 'dev');
           break;
 
@@ -78,7 +82,15 @@ const Home: React.FC = () => {
   }, []);
 
   const handleRequestSnippet = useCallback(() => {
+    console.log('handleRequestSnippet called');
     parent.postMessage({ pluginMessage: { type: 'generate-code-snippets', selection: currentSelection } }, '*');
+    toggleStep(3);
+    if (formRef.current) {
+      console.log('formRef.current exists');
+      formRef.current.handleSubmit();
+    } else {
+      console.log('formRef.current does not exist');
+    }
   }, [currentSelection]);
 
   const handleDownloadJson = useCallback(() => {
@@ -88,7 +100,7 @@ const Home: React.FC = () => {
 
   const handleDownloadVariantProperties = useCallback(() => {
   const blob = new Blob([JSON.stringify(variantProperties, null, 2)], { type: 'application/json' });
-  saveAs(blob, currentSelection[0].name.replace(/\s+/g, '') + 'variantProperties.json');
+  saveAs(blob, currentSelection[0].name.replace(/\s+/g, '') + '_properties.json');
 }, [variantProperties]);
 
   return (
@@ -98,16 +110,16 @@ const Home: React.FC = () => {
         {validSelection && currentSelection.length === 1 ? (
           <>
             <div className="content">
-              { readyToGenerate && (
+              { currentStep === 2 && (
                 <>
                 <div className="alert component">
                   <h3>Component Configuration</h3>
                   <p>Customize your code generation options.</p>
                 </div>
-                <ConfigForm />
+                <ConfigForm ref={formRef} />
                 </>
               )}
-              {!codeSnippet && !readyToGenerate && (
+              {!codeSnippet && currentStep !== 2 && (
                 <div>
                   {currentSelection.length === 1 ? (
                     renderSelectionDetails(loading, currentSelection, isAiChecked, isDevMode, variantProperties)
@@ -116,7 +128,7 @@ const Home: React.FC = () => {
                   )}
                 </div>
               )}
-              {codeSnippet && (
+              {currentStep === 3 && codeSnippet && (
                 <>
                   <h3>Code Templates <span className="beta">BETA</span></h3>
                   <Tabs style={{ marginBottom: '20px' }} codeSnippets={codeSnippet as any} />
@@ -164,11 +176,18 @@ const Home: React.FC = () => {
       <div className="bottom">
         {validSelection && currentSelection.length === 1 ? (
           <div className="actions">
-            {codeSnippet || readyToGenerate ? (
-              <button id="goBack" onClick={() => setCodeSnippet(null)}>
-              <MdOutlineSkipPrevious /> Back
-              </button>
-              ): 
+            {
+              currentStep === 2 ? (
+                <>
+                  <button id="goBackFromGenerate" onClick={() => setCurrentStep(1)}>
+                    <MdOutlineSkipPrevious /> Back
+                  </button>
+                </>
+              ) : codeSnippet ? (
+                <button id="goBackFromGenerate" onClick={() => { setCodeSnippet(null); setCurrentStep(1); }}>
+                  <MdOutlineSkipPrevious /> Back
+                </button>
+              ) :
               <>
                 <div className="button-group">
                   <button onClick={handleDownloadJson}><MdOutlineFileDownload /> Component.json</button>
@@ -176,15 +195,15 @@ const Home: React.FC = () => {
                 </div>
                 </>
               }
-            {isAiChecked ? (
+            {currentStep !== 3 && isAiChecked ? (
               <button id="generate" onClick={() => console.log('GENERATE MAGIC AI WOOP')}><SiGooglegemini /> Generate Component</button>
             ) : (
               <>
                 {
-                  readyToGenerate ? (
+                  currentStep === 2 ? (
                     <button id="create" onClick={handleRequestSnippet}><FaCode /> Create Code Templates</button>
                   ) : (
-                    <button id="create" onClick={() => setReadyToGenerate(true)}>Continue <MdSkipNext /></button>
+                    <button id="create" onClick={() => setCurrentStep(2)}>Continue <MdSkipNext /></button>
                   )
                 }
               </>

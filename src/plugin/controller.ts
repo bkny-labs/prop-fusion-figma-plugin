@@ -32,7 +32,10 @@ class FigmaController {
   async copyToClipboard(code: string) {
     try {
       await navigator.clipboard.writeText(code);
-      parent.postMessage({ pluginMessage: { type: 'copy-success', message: 'Successfully copied to clipboard!' } }, '*');
+      parent.postMessage(
+        { pluginMessage: { type: 'copy-success', message: 'Successfully copied to clipboard!' } },
+        '*'
+      );
       logger.info('📋📋 Copied to clipboard');
     } catch (err) {
       logger.error('⛔️⛔️ Failed to copy:', err);
@@ -40,17 +43,35 @@ class FigmaController {
     }
   }
 
-  getVariantProps() {
+  async getVariablesByIds(ids: string[]) {
+    const variables = await Promise.all(ids.map((id) => figma.variables.getVariableById(id)));
+    logger.info('🔍🔍 Getting variables by id', variables);
+    return variables;
+  }
+
+  async getVariableById(id: string) {
+    const variable = await figma.variables.getVariableByIdAsync(id);
+    logger.info('🔍 Getting variable by id', variable);
+    return variable;
+  }
+
+  async getVariantProps() {
     try {
       const selection = figma.currentPage.selection;
-      selection.forEach(node => {
+      for (const node of selection) {
         if (node.type === 'COMPONENT_SET') {
           const serializedNode = serializeNode(node);
-          let variantProps = calculateVariantProperties(serializedNode);
-          figma.ui.postMessage({ type: 'variant-properties', variantProperties: variantProps });
-        }
-      });
+          // Calculate variant properties first
+          const variantProps = await calculateVariantProperties(serializedNode);
 
+          // Then resolve bound variables
+          const resolvedVariantProps = await this.resolveBoundVariables(variantProps);
+          // console.log('🔍🔍 Resolved variant properties:', resolvedVariantProps);
+
+          // Send the variant properties to the UI
+          figma.ui.postMessage({ type: 'variant-properties', variantProperties: resolvedVariantProps });
+        }
+      }
     } catch (error) {
       logger.error('⛔️⛔️ Error getting variant properties:', error);
     }
@@ -68,6 +89,9 @@ class FigmaController {
       case 'get-current-selection':
         this.handleSelectionChange();
         break;
+      case 'get-variables-by-id':
+        this.getVariableById(msg.id);
+        break;
       case 'generate-code-snippets':
         this._messageService.generateSnippet(msg);
         break;
@@ -75,11 +99,12 @@ class FigmaController {
         this.resizeWindow(msg.width, msg.height);
         break;
       case 'send-prompt-to-gemini':
-        this._geminiService.sendPromptToGemini(msg.prompt)
-          .then(responseText => {
+        this._geminiService
+          .sendPromptToGemini(msg.prompt)
+          .then((responseText) => {
             logger.log('🦄🦄 Gemini response:', responseText);
           })
-          .catch(error => {
+          .catch((error) => {
             logger.error('🦄🦄 Error sending prompt to Gemini:', error);
           });
         break;
@@ -99,12 +124,12 @@ class FigmaController {
       const currentNode = selections.map(serializeNode);
       figma.ui.postMessage({ type: 'selection-update', selection: currentNode });
 
-      const isComponentSetSelected = selections.some(node => node.type === 'COMPONENT_SET');
+      const isComponentSetSelected = selections.some((node) => node.type === 'COMPONENT_SET');
       if (!isComponentSetSelected) {
         this._stateService.setSlice(StateNames.CURRENT_SELECTION, currentNode);
         this._stateService.clearState(StateNames.SNIPPET);
         figma.ui.resize(widthSmall, heightSmall);
-      } else if(selections.length === 1) {
+      } else if (selections.length === 1) {
         figma.ui.resize(widthLarge, heightLarge);
       }
 
@@ -133,6 +158,58 @@ class FigmaController {
     figma.ui.resize(width, height);
   };
 
+  // @name resolveBoundVariables
+  // @params item: any, getVariablesByIds: any
+  // @description Processes boundVariables
+  // @returns Promise<any>
+  async resolveBoundVariables(data: any) {
+    const resolveVariableValue = async (boundVariable: any, targetObject: any, propertyName: string, index: number) => {
+      if (typeof boundVariable !== 'object' || boundVariable === null) {
+          console.error('Invalid boundVariable:', boundVariable);
+          return; // Exit early if boundVariable is not an object
+      }
+      const variableId = boundVariable.id;
+      try {
+          const variable = await figma.variables.getVariableByIdAsync(variableId);
+          logger.log('🔍🔍 Resolving variable:', variableId);
+          targetObject[propertyName][index].color = variable.name; // Update the corresponding property directly
+      } catch (error) {
+          console.error('Error resolving variable:', error); // Log any errors
+      }
+  };
+  
+  const transformObject = async (obj: any) => {
+      for (const key in obj) {
+          if (obj.hasOwnProperty(key)) {
+              if (Array.isArray(obj[key])) {
+                  for (let i = 0; i < obj[key].length; i++) {
+                      await transformObject(obj[key][i]);
+                  }
+              } else if (typeof obj[key] === 'object') {
+                  await transformObject(obj[key]); // Recursively transform nested objects
+              }
+              if (key === 'boundVariables' && obj[key]) {
+                  for (const propertyName in obj[key]) {
+                      if (obj[key].hasOwnProperty(propertyName)) {
+                          const boundVariable = obj[key][propertyName];
+                          await resolveVariableValue(boundVariable, obj, propertyName, 0); // Assuming there's only one item in the array
+                      }
+                  }
+                  delete obj.boundVariables; // Remove the 'boundVariables' property after resolution
+              }
+          }
+      }
+  };
+  
+  
+  
+    await transformObject(data);
+
+    console.log('Data:', data);
+
+    return data;
+  }
+
   setEditorType(editorType: string) {
     figma.ui.postMessage({ type: 'editor-type', editor: editorType });
     // this._stateService.setSlice(StateNames.EDITOR_TYPE, editorType);
@@ -140,19 +217,19 @@ class FigmaController {
 
   setConfig(config: any) {
     const selections = figma.currentPage.selection;
-    const currentNode = selections.map(node => {
-    const serializedNode = serializeNode(node);
-    return {
-      ...serializedNode,
-      config: {
-        framework: config.framework || "react",
-        typescript: config.typescript || true,
-        styles: config.styles || "css"
-      }
-    };
-  });
-}
-
+    const transformedSelections = selections.map((node) => {
+      const serializedNode = serializeNode(node);
+      return {
+        ...serializedNode,
+        config: {
+          framework: config.framework || 'react',
+          typescript: config.typescript || true,
+          styles: config.styles || 'css',
+        },
+      };
+    });
+    console.log('🔧🔧 Configured: ', transformedSelections);
+  }
 }
 
 export const figmaController = new FigmaController();

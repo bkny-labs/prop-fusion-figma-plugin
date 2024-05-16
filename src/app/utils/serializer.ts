@@ -1,17 +1,10 @@
-function rgbToHex(r, g, b) {
-  return "#" + [r, g, b].map(x => {
-    const hex = Math.round(x * 255).toString(16);
-    return hex.length === 1 ? "0" + hex : hex;
-  }).join('');
-}
+import { rgbToHex } from './rgba-to-hex';
 
-// Should do the lookup for bound variables somewhere else
-// function getVariableName(variableId) {
-//   const variable = figma.getLocalPaintStyles().find(style => style.id === variableId);
-//   return variable ? variable.name : null;
-// }
-
-export function serializeNode(node, depth = 0): any {
+// @name serializeNode
+// @params node: any, depth: number, getVariablesByIds: any
+// @description Serializes a node
+// @returns Promise<any>
+export function serializeNode(node, depth = 0) {
   const componentSet = node.type === 'COMPONENT_SET' && depth === 0;
   const componentPropertyDefinitionNames = componentSet && node.componentPropertyDefinitions ? Object.keys(node.componentPropertyDefinitions) : [];
   const variantGroupPropertyNames = componentSet && node.variantGroupProperties ? Object.keys(node.variantGroupProperties) : [];
@@ -34,20 +27,21 @@ export function serializeNode(node, depth = 0): any {
         // Ignore the child's children
         const { children, ...childWithoutChildren } = child;
 
-        return { ...childWithoutChildren, 
-
+        return { 
+          ...childWithoutChildren, 
           // id: child.id,
           type: child.type,
           name: child.name,
           // devStatus: child.devStatus,
           props: {
             opacity: child.opacity,
+            // backgrounds: Array.isArray(child.backgrounds) ? Promise.all(child.backgrounds.map(processBoundVariables)) : [],
             backgrounds: Array.isArray(child.backgrounds) ? child.backgrounds.map(background => ({
               type: background.type, 
               visible: background.visible,
               opacity: background.opacity,
               blendMode: background.blendMode,
-              color: rgbToHex(background.color.r, background.color.g, background.color.b),
+              // color: rgbToHex(background.color.r, background.color.g, background.color.b),
               boundVariables: background.boundVariables,
             })) : [],
             blendMode: child.blendMode,
@@ -59,12 +53,13 @@ export function serializeNode(node, depth = 0): any {
             maxWidth: child.maxWidth,
             minHeight: child.minHeight,
             maxHeight: child.maxHeight,
+            // fills: child.fills ? Promise.all(child.fills.map(fill => processBoundVariables(fill))) : [],
             fills: child.fills ? child.fills.map(fill => ({
               type: fill.type, 
               visible: fill.visible,
               opacity: fill.opacity,
               blendMode: fill.blendMode,
-              color: rgbToHex(fill.color.r, fill.color.g, fill.color.b),
+              // color: rgbToHex(fill.color.r, fill.color.g, fill.color.b),
               boundVariables: fill.boundVariables,
             })) : [],
             strokes: child.strokes ? child.strokes.map(stroke => ({
@@ -72,7 +67,7 @@ export function serializeNode(node, depth = 0): any {
               visible: stroke.visible,
               opacity: stroke.opacity,
               blendMode: stroke.blendMode,
-              color: rgbToHex(stroke.color.r, stroke.color.g, stroke.color.b),
+              // color: rgbToHex(stroke.color.r, stroke.color.g, stroke.color.b),
               boundVariables: stroke.boundVariables,
             })) : [],
             strokeWeight: child.strokeWeight,

@@ -9,6 +9,9 @@ const ConfigForm = forwardRef((props, ref) => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
+    console.log(
+      `Framework: ${framework}, Typescript: ${typescript}, Styles: ${styles}`
+    );
     parent.postMessage({ 
       pluginMessage: { 
         type: 'set-config', 
