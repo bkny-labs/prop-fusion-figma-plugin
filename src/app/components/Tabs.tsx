@@ -10,15 +10,16 @@ interface TabData {
   icon: React.ReactNode;
   code: string;
 }
-
+ 
 interface TabsProps {
   style?: CSSProperties;
-  codeSnippets: { [key: string]: string };
+  codeSnippets: { [key: string]: string }; 
+  showTabs?: string[];
 }
 
-const Tabs: React.FC<TabsProps> = ({ style, codeSnippets }) => {
-  const [selectedTab, setSelectedTab] = useState<string>('react');
-  const [selectedTab2, setSelectedTab2] = useState<string>('typescript');
+const Tabs: React.FC<TabsProps> = ({ style, codeSnippets, showTabs }) => {
+  const [selectedTab, setSelectedTab] = useState<string>(showTabs ? showTabs[0] : '');
+  const [selectedTab2, setSelectedTab2] = useState<string>(showTabs ? showTabs[2] : '');
 
   const tabsData: TabData[] = [
     {
@@ -41,13 +42,6 @@ const Tabs: React.FC<TabsProps> = ({ style, codeSnippets }) => {
       id: 'webComponents', label: 'WC', icon: <SiWebcomponentsdotorg />,
       code: undefined
     },
-  ];
-
-  const tabs2Data: TabData[] = [
-    {
-      id: 'typescript', label: 'TypeScript', icon: <SiTypescript />,
-      code: undefined
-    },
     {
       id: 'css', label: 'CSS', icon: <FaCss3Alt />,
       code: undefined
@@ -55,14 +49,23 @@ const Tabs: React.FC<TabsProps> = ({ style, codeSnippets }) => {
     {
       id: 'scss', label: 'SCSS', icon: <FaSass />,
       code: undefined
+    },
+    {
+      id: 'typescript', label: 'TypeScript', icon: <SiTypescript />,
+      code: undefined
     }
   ];
+
+
+  const filteredTabsData = showTabs 
+    ? tabsData.filter(tab => showTabs.includes(tab.id))
+    : tabsData;
 
   return (
     <>
       <div className="tabs-container" style={style}> 
         <ul className="tabs-list">
-          {tabsData.map((tab) => (
+          {filteredTabsData.map((tab) => (
             <li
               key={tab.id}
               className={`tab ${selectedTab === tab.id ? 'selected' : ''}`}
@@ -78,7 +81,7 @@ const Tabs: React.FC<TabsProps> = ({ style, codeSnippets }) => {
         </ul>
 
         <div className="tab-content">
-          {tabsData.map((tab) => (
+          {filteredTabsData.map((tab) => (
             selectedTab === tab.id && (
               <CodeSnippet 
                 key={tab.id}
@@ -89,35 +92,6 @@ const Tabs: React.FC<TabsProps> = ({ style, codeSnippets }) => {
           ))}
         </div>
       </div>
-      <div className="tabs-container" style={style}> 
-        <ul className="tabs-list">
-          {tabs2Data.map((tab) => (
-            <li
-              key={tab.id}
-              className={`tab ${selectedTab2 === tab.id ? 'selected' : ''}`}
-              onClick={() => setSelectedTab2(tab.id)}
-              data-id={tab.id}
-            >
-              <div className="tab-logo">
-                {tab.icon} 
-              </div>
-              <span>{tab.label}</span>
-            </li>
-          ))}
-        </ul>
-
-        <div className="tab-content">
-          {tabs2Data.map((tab) => (
-            selectedTab2 === tab.id && (
-              <CodeSnippet 
-                key={tab.id}
-                code={codeSnippets[tab.id] || ''}
-                language="typescript" 
-              />
-            )
-          ))}
-      </div>
-    </div>
     </>
   );
 };

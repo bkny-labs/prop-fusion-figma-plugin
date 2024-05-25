@@ -11,6 +11,7 @@ export function serializeNode(node, depth = 0) {
   const componentPropertyDefinitions = {};
   const variantGroupProperties = {};
   let serializedChildren = [];
+  let defaultProps = {};
 
   if (componentSet) {
     componentPropertyDefinitionNames.forEach(name => {
@@ -23,6 +24,8 @@ export function serializeNode(node, depth = 0) {
     });
 
     if (node.children) {
+      const firstChild = node.children[0];
+      defaultProps = firstChild ? { ...firstChild.props } : {};
       serializedChildren = node.children.map(child => {
         // Ignore the child's children
         const { children, ...childWithoutChildren } = child;
@@ -32,7 +35,6 @@ export function serializeNode(node, depth = 0) {
           // id: child.id,
           type: child.type,
           name: child.name,
-          // devStatus: child.devStatus,
           props: {
             opacity: child.opacity,
             // backgrounds: Array.isArray(child.backgrounds) ? Promise.all(child.backgrounds.map(processBoundVariables)) : [],
@@ -41,7 +43,7 @@ export function serializeNode(node, depth = 0) {
               visible: background.visible,
               opacity: background.opacity,
               blendMode: background.blendMode,
-              // color: rgbToHex(background.color.r, background.color.g, background.color.b),
+              color: rgbToHex(background.color.r, background.color.g, background.color.b),
               boundVariables: background.boundVariables,
             })) : [],
             blendMode: child.blendMode,
@@ -53,13 +55,12 @@ export function serializeNode(node, depth = 0) {
             maxWidth: child.maxWidth,
             minHeight: child.minHeight,
             maxHeight: child.maxHeight,
-            // fills: child.fills ? Promise.all(child.fills.map(fill => processBoundVariables(fill))) : [],
             fills: child.fills ? child.fills.map(fill => ({
               type: fill.type, 
               visible: fill.visible,
               opacity: fill.opacity,
               blendMode: fill.blendMode,
-              // color: rgbToHex(fill.color.r, fill.color.g, fill.color.b),
+              color: rgbToHex(fill.color.r, fill.color.g, fill.color.b),
               boundVariables: fill.boundVariables,
             })) : [],
             strokes: child.strokes ? child.strokes.map(stroke => ({
@@ -67,7 +68,7 @@ export function serializeNode(node, depth = 0) {
               visible: stroke.visible,
               opacity: stroke.opacity,
               blendMode: stroke.blendMode,
-              // color: rgbToHex(stroke.color.r, stroke.color.g, stroke.color.b),
+              color: rgbToHex(stroke.color.r, stroke.color.g, stroke.color.b),
               boundVariables: stroke.boundVariables,
             })) : [],
             strokeWeight: child.strokeWeight,
@@ -137,5 +138,7 @@ export function serializeNode(node, depth = 0) {
     defaultVariantName: node.defaultVariant ? node.defaultVariant.name : null,
     componentPropertyDefinitions: componentSet ? componentPropertyDefinitions : {},
     children: serializedChildren,
-    variantGroupProperties: componentSet && depth < 1 ? variantGroupProperties : {},  }
+    variantGroupProperties: componentSet && depth < 1 ? variantGroupProperties : {},  
+    defaultProps: defaultProps,
+  }
 }

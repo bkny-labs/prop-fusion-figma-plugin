@@ -11,6 +11,11 @@ import { TbHandStop } from "react-icons/tb";
 import CodeSnippet from './CodeSnippet';
 import ConfigForm from './ConfigForm';
 
+interface ConfigFormHandle {
+  handleSubmit: () => void;
+  getValues: () => { framework: string; typescript: string; styles: string };
+}
+
 const Home: React.FC = () => {
   const [currentSelection, setCurrentSelection] = useState([]);
   const [codeSnippet, setCodeSnippet] = useState(null);
@@ -20,8 +25,9 @@ const Home: React.FC = () => {
   const [isAiChecked, setIsAiChecked] = useState(false);
   const [isDevMode, setIsDevMode] = useState(false);
   const [variantProperties, setVariantProperties] = useState({});
-  const formRef = useRef<{ handleSubmit: () => void } | null>(null);
+  const formRef = useRef<ConfigFormHandle | null>(null);
   const [currentStep, setCurrentStep] = useState(1);
+  const [showTabs, setShowTabs] = useState<string[]>([]);
 
   const toggleStep = (step: number) => {
     setCurrentStep(step);
@@ -82,12 +88,15 @@ const Home: React.FC = () => {
   }, []);
 
   const handleRequestSnippet = useCallback(() => {
-    console.log('handleRequestSnippet called');
     parent.postMessage({ pluginMessage: { type: 'generate-code-snippets', selection: currentSelection } }, '*');
     toggleStep(3);
     if (formRef.current) {
       console.log('formRef.current exists');
       formRef.current.handleSubmit();
+      const formData = formRef.current?.getValues();
+      console.log('form data', formData);
+      const formDataArray = formData ? Object.values(formData).map(value => String(value)) : [];
+      setShowTabs(formDataArray);
     } else {
       console.log('formRef.current does not exist');
     }
@@ -95,13 +104,19 @@ const Home: React.FC = () => {
 
   const handleDownloadJson = useCallback(() => {
     const blob = new Blob([JSON.stringify(currentSelection, null, 2)], { type: 'application/json' });
-    saveAs(blob, currentSelection[0].name.replace(/\s+/g, '') + 'Component.json');
+    saveAs(blob, currentSelection[0].name.replace(/\s+/g, '') + '.json');
   }, [currentSelection]);
 
   const handleDownloadVariantProperties = useCallback(() => {
   const blob = new Blob([JSON.stringify(variantProperties, null, 2)], { type: 'application/json' });
   saveAs(blob, currentSelection[0].name.replace(/\s+/g, '') + '_properties.json');
 }, [variantProperties]);
+
+  useEffect(() => {
+    const initialFormData = formRef.current?.getValues();
+    const initialShowTabs = initialFormData ? Object.values(initialFormData).map(value => String(value)) : [];
+    setShowTabs(initialShowTabs);
+  }, []);
 
   return (
     <>
@@ -114,7 +129,8 @@ const Home: React.FC = () => {
                 <>
                 <div className="alert component">
                   <h3>Component Configuration</h3>
-                  <p>Customize your code generation options.</p>
+                  <p>Customize your code generation options. 
+                    <br />Looking for more options? Add your idea to <a href="https://trello.com/b/MYpQY0KK/propfusion-features-board">the Trello board</a>.</p>
                 </div>
                 <ConfigForm ref={formRef} />
                 </>
@@ -131,7 +147,7 @@ const Home: React.FC = () => {
               {currentStep === 3 && codeSnippet && (
                 <>
                   <h3>Code Templates <span className="beta">BETA</span></h3>
-                  <Tabs style={{ marginBottom: '20px' }} codeSnippets={codeSnippet as any} />
+                  <Tabs style={{ marginBottom: '20px' }} codeSnippets={codeSnippet as any} showTabs={showTabs} />
                 </>
               )}
             </div>
@@ -184,7 +200,7 @@ const Home: React.FC = () => {
                   </button>
                 </>
               ) : codeSnippet ? (
-                <button id="goBackFromGenerate" onClick={() => { setCodeSnippet(null); setCurrentStep(1); }}>
+                <button id="goBackFromGenerate2" onClick={() => { setCodeSnippet(null); setCurrentStep(2); }}>
                   <MdOutlineSkipPrevious /> Back
                 </button>
               ) :
@@ -202,7 +218,7 @@ const Home: React.FC = () => {
                 {
                   currentStep === 2 ? (
                     <button id="create" onClick={handleRequestSnippet}><FaCode /> Create Code Templates</button>
-                  ) : (
+                  ) : currentStep !== 3 && (
                     <button id="create" onClick={() => setCurrentStep(2)}>Continue <MdSkipNext /></button>
                   )
                 }
@@ -312,6 +328,7 @@ const renderSelectionDetails = (loading, nodes, isAiChecked, isDevMode, variantP
           ))}
         </tbody>
       </table>
+      {/* TODO MAKE THIS DATA MORE BETTERER */}
       {isDevMode && (
       <>
       <h3>Variant Properties <span className="beta">BETA</span>
