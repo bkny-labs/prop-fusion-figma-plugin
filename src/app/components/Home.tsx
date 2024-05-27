@@ -1,14 +1,20 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import logo from '../assets/logo.png';
-import '../styles/ui.css';
+import '../styles/ui.scss';
 import Tabs from './Tabs';
-import { MdOutlineFileDownload, MdOutlineSkipPrevious } from "react-icons/md";
+import { MdOutlineFileDownload, MdOutlineSkipPrevious, MdSkipNext } from "react-icons/md";
 import { FaBook, FaCode, FaGithub, FaSpinner } from 'react-icons/fa';
 import pkg from '../../../package.json';
 import { SiBuymeacoffee, SiGooglegemini } from 'react-icons/si';
 import { saveAs } from 'file-saver';
 import { TbHandStop } from "react-icons/tb";
 import CodeSnippet from './CodeSnippet';
+import ConfigForm from './ConfigForm';
+
+interface ConfigFormHandle {
+  handleSubmit: () => void;
+  getValues: () => { framework: string; typescript: string; styles: string };
+}
 
 const Home: React.FC = () => {
   const [currentSelection, setCurrentSelection] = useState([]);
@@ -16,12 +22,16 @@ const Home: React.FC = () => {
   const [validSelection, setValidSelection] = useState(null);
   const [nothingSelected, setNothingSelected] = useState(true);
   const [loading, setLoading] = useState(true);
-  const [readyToGenerate, setReadyToGenerate] = useState(false);
   const [isAiChecked, setIsAiChecked] = useState(false);
   const [isDevMode, setIsDevMode] = useState(false);
   const [variantProperties, setVariantProperties] = useState({});
+  const formRef = useRef<ConfigFormHandle | null>(null);
+  const [currentStep, setCurrentStep] = useState(1);
+  const [showTabs, setShowTabs] = useState<string[]>([]);
 
-
+  const toggleStep = (step: number) => {
+    setCurrentStep(step);
+  };
 
   useEffect(() => {
     parent.postMessage({ pluginMessage: { type: 'get-current-selection' } }, '*');
@@ -36,7 +46,7 @@ const Home: React.FC = () => {
         case 'selection-update':
           setValidSelection(message.selection.some(item => item.type === 'COMPONENT_SET'));
           setCurrentSelection(message.selection);
-          setReadyToGenerate(false);
+          setCurrentStep(1);
 
           // If there's no selection, set codeSnippet to null
           if (message.selection.length === 0 || message.selection.length > 1) {
@@ -79,17 +89,33 @@ const Home: React.FC = () => {
 
   const handleRequestSnippet = useCallback(() => {
     parent.postMessage({ pluginMessage: { type: 'generate-code-snippets', selection: currentSelection } }, '*');
+    toggleStep(3);
+    if (formRef.current) {
+      formRef.current.handleSubmit();
+      const formData = formRef.current?.getValues();
+      console.log('form data', formData);
+      const formDataArray = formData ? Object.values(formData).map(value => String(value)) : [];
+      setShowTabs(formDataArray);
+    } else {
+      console.log('formRef.current does not exist');
+    }
   }, [currentSelection]);
 
   const handleDownloadJson = useCallback(() => {
     const blob = new Blob([JSON.stringify(currentSelection, null, 2)], { type: 'application/json' });
-    saveAs(blob, currentSelection[0].name.replace(/\s+/g, '') + 'Component.json');
+    saveAs(blob, currentSelection[0].name.replace(/\s+/g, '') + '.json');
   }, [currentSelection]);
 
   const handleDownloadVariantProperties = useCallback(() => {
   const blob = new Blob([JSON.stringify(variantProperties, null, 2)], { type: 'application/json' });
-  saveAs(blob, currentSelection[0].name.replace(/\s+/g, '') + 'variantProperties.json');
+  saveAs(blob, currentSelection[0].name.replace(/\s+/g, '') + '_properties.json');
 }, [variantProperties]);
+
+  useEffect(() => {
+    const initialFormData = formRef.current?.getValues();
+    const initialShowTabs = initialFormData ? Object.values(initialFormData).map(value => String(value)) : [];
+    setShowTabs(initialShowTabs);
+  }, []);
 
   return (
     <>
@@ -98,7 +124,17 @@ const Home: React.FC = () => {
         {validSelection && currentSelection.length === 1 ? (
           <>
             <div className="content">
-              {!codeSnippet && (
+              { currentStep === 2 && (
+                <>
+                <div className="alert component">
+                  <h3>Component Configuration</h3>
+                  <p>Customize your code generation options. 
+                    <br />Looking for more options? Add your idea to <a href="https://trello.com/b/MYpQY0KK/propfusion-features-board">the Trello board</a>.</p>
+                </div>
+                <ConfigForm ref={formRef} />
+                </>
+              )}
+              {!codeSnippet && currentStep !== 2 && (
                 <div>
                   {currentSelection.length === 1 ? (
                     renderSelectionDetails(loading, currentSelection, isAiChecked, isDevMode, variantProperties)
@@ -107,10 +143,10 @@ const Home: React.FC = () => {
                   )}
                 </div>
               )}
-              {codeSnippet && (
+              {currentStep === 3 && codeSnippet && (
                 <>
                   <h3>Code Templates <span className="beta">BETA</span></h3>
-                  <Tabs style={{ marginBottom: '20px' }} codeSnippets={codeSnippet as any} />
+                  <Tabs style={{ marginBottom: '20px' }} codeSnippets={codeSnippet as any} showTabs={showTabs} />
                 </>
               )}
             </div>
@@ -155,33 +191,37 @@ const Home: React.FC = () => {
       <div className="bottom">
         {validSelection && currentSelection.length === 1 ? (
           <div className="actions">
-            {codeSnippet ? (
-              <button id="goBack" onClick={() => setCodeSnippet(null)}>
-              <MdOutlineSkipPrevious /> Back
-              </button>
-              ): 
+            {
+              currentStep === 2 ? (
+                <>
+                  <button id="goBackFromGenerate" onClick={() => setCurrentStep(1)}>
+                    <MdOutlineSkipPrevious /> Back
+                  </button>
+                </>
+              ) : codeSnippet ? (
+                <button id="goBackFromGenerate2" onClick={() => { setCodeSnippet(null); setCurrentStep(2); }}>
+                  <MdOutlineSkipPrevious /> Back
+                </button>
+              ) :
               <>
                 <div className="button-group">
                   <button onClick={handleDownloadJson}><MdOutlineFileDownload /> Component.json</button>
                   <button onClick={handleDownloadVariantProperties}><MdOutlineFileDownload /> VariantProps.json <span className="beta">BETA</span></button> 
                 </div>
-                <div className="checkbox-container">
-                  {/* <input 
-                    type="checkbox" 
-                    id="generateWithAI" 
-                    name="generateWithAI"
-                    checked={isAiChecked} 
-                    // disabled={true}
-                    onChange={() => setIsAiChecked(!isAiChecked)}
-                  />
-                  <label htmlFor="generateWithAI">Use AI</label> */}
-                </div>
                 </>
               }
-            {isAiChecked ? (
+            {currentStep !== 3 && isAiChecked ? (
               <button id="generate" onClick={() => console.log('GENERATE MAGIC AI WOOP')}><SiGooglegemini /> Generate Component</button>
             ) : (
-              <button id="create" onClick={handleRequestSnippet}><FaCode /> Create Code Templates</button>
+              <>
+                {
+                  currentStep === 2 ? (
+                    <button id="create" onClick={handleRequestSnippet}><FaCode /> Create Code Templates</button>
+                  ) : currentStep !== 3 && (
+                    <button id="create" onClick={() => setCurrentStep(2)}>Continue <MdSkipNext /></button>
+                  )
+                }
+              </>
             )}
           </div>
         ) : (
@@ -287,6 +327,7 @@ const renderSelectionDetails = (loading, nodes, isAiChecked, isDevMode, variantP
           ))}
         </tbody>
       </table>
+      {/* TODO MAKE THIS DATA MORE BETTERER */}
       {isDevMode && (
       <>
       <h3>Variant Properties <span className="beta">BETA</span>

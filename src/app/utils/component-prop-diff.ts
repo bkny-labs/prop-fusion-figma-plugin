@@ -1,6 +1,10 @@
 import * as deepDiff from 'deep-diff';
 import { set } from 'lodash';
+import { figmaController } from '../../plugin/controller';
 
+// @name calculateVariantProperties
+// @params currentSelection: ComponentSetNode
+// @description Calculates the variant properties by comparing the differences between the ComponentNode children in the ComponentSetNode selection
 export function calculateVariantProperties(currentSelection) {
   const variants = {};  
   const children = currentSelection.children;
@@ -67,8 +71,6 @@ export function calculateVariantProperties(currentSelection) {
       }
     }
   }
-
-  // console.log('all variants??', variants);
 
   return variants;
 

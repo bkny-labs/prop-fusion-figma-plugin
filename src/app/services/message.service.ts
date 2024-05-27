@@ -1,8 +1,7 @@
-import { StateService } from './state.service';
+import { stateService } from './state.service'; 
 import { StateNames } from '../../types/states.model';
 import { heightLarge, widthLarge } from '../../plugin/controller';
-
-const stateService = new StateService();
+import { camelCase, upperFirst } from 'lodash';
 export class MessageService {
   public handleResize(msg): void {
     figma.ui.resize(msg.width, msg.height);
@@ -12,15 +11,20 @@ export class MessageService {
     figma.notify(msg.type === 'copy-success' ? 'Copied to clipboard!' : `${msg.message}`);
   }
 
+  public bemClassNames(componentName: string, classProps: Record<string, string>): string {
+    return Object.entries(classProps)
+      .map(([key, value]) => `${componentName}__${value}`)
+      .join(', ');
+  }
+
   public generateSnippet(msg: MessageEvent): void {
     const [component] = msg.selection;
     if (component && component.type === 'COMPONENT_SET' && component.componentPropertyDefinitions) {
-      const componentName = component.name.replace(/\s+/g, '') + 'Component';
+      const componentName = component.name.replace(/\s+/g, '');
       const componentNameTypes = component.name.replace(/\s+/g, '') + 'Types';
       const cssFileName = component.name.toLowerCase().replace(/\s+/g, '-') + '.css';
       const variantProps = Object.entries(component.componentPropertyDefinitions);
-      const variantProperties = stateService.getValue(StateNames.VARIANT_PROPERTIES);
-      console.log('🍇🍇 Variant Properties:', variantProperties);
+      let cssClasses;
 
       const propTypes = variantProps
         .map(([key, value]) => {
@@ -36,30 +40,54 @@ export class MessageService {
       const classProps = variantProps
         .map(([key, value]) => {
           if (value.type === 'VARIANT') {
-            return `${key.toLowerCase()}={props.${key.toLowerCase()}}`;
+            return `${key.toLowerCase()}={${key.toLowerCase()}}`;
           }
           return null;
         })
         .filter(Boolean)
         .join(' ');
 
-      // Generating CSS for each variant property
-      const cssClasses = variantProps
-      .map(([key, value]) => {
-        if (value.type === 'VARIANT') {
-          return value.variantOptions
-            .map(
-              (option) => `
+
+      if ("children" in component && Array.isArray(component.children) && component.children.length > 0) {
+        const firstChild = component.children[0];
+        // Generating CSS for each variant property
+        cssClasses = variantProps.map(([key, value]) => {
+          if (value.type === 'VARIANT') {
+            return value.variantOptions.map(option => {
+              let relevantProps = {};
+      
+              if (key === 'fills' || key === 'strokes' || key === 'backgrounds') {
+                // Handle arrays of objects (fills, strokes, backgrounds)
+                const property = firstChild.props[key]?.find(item => item.boundVariables?.variant === option);
+                relevantProps = property ? { color: property.color, opacity: property.opacity } : {};
+              } else if (key === 'borderRadius' || key === 'padding') {
+                // Handle borderRadius and padding (objects)
+                relevantProps = firstChild.props[key] || {};
+              } else {
+                // Handle other direct property values
+                relevantProps = { [key]: firstChild.props[key] };
+              }
+      
+              const additionalProperties = Object.entries(relevantProps).map(([propName, propValue]) => {
+                const cssPropName = propName.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+      
+                if (propName === 'borderRadius' || propName === 'padding') {
+                  return Object.entries(propValue).map(([side, amount]) => `  ${cssPropName}-${side}: ${amount}px;`).join('\n');
+                }
+                return `  ${cssPropName}: ${propValue};`;
+              }).join('\n');
+      
+              return `
 .${component.name.toLowerCase()}-${key.toLowerCase()}-${option.toLowerCase().replace(/\s+/g, '-')} {
-  /* Example CSS based on ${key} and its value ${option} */
-}
-      `
-            )
-            .join('');
-        }
-        return '';
-      })
-      .join('');
+  ${additionalProperties}
+}`;
+            }).join('');
+          }
+          return '';
+        }).join('');
+      } else {
+        figma.ui.postMessage({ type: 'error', message: 'The selected component does not have children or the children are not in the expected format.' });
+      }
 
       // Condition to check if the 'Disabled' state is included in the properties
       const disabledCheck = variantProps.some(
@@ -71,7 +99,7 @@ export class MessageService {
       .map(([key, value]) => {
         key = key.split('#')[0].replace(/\s+/g, '');
         if (value.type === 'VARIANT') {
-          return `${key}: ${key}Type;`;
+          return `${key}: ${key};`;
         } else if (value.type === 'BOOLEAN') {
           return `${key}: boolean;`;
         } else if (value.type === 'TEXT') {
@@ -86,12 +114,12 @@ export class MessageService {
 
       // Template literal for React component
       const snippet = {
-        react: this.reactTemplate(componentName, componentNameTypes, cssFileName, variantProps, classProps, disabledCheck, interfaceProps, cssClasses),
-        angular: this.angularTemplate(componentName, cssFileName, variantProps, classProps, disabledCheck, interfaceProps, cssClasses, component, propTypes),
+        react: this.reactTemplate(componentName, component, componentNameTypes, cssFileName, variantProps, classProps, disabledCheck, interfaceProps, cssClasses),
+        angular: this.angularTemplate(componentName, componentNameTypes, cssFileName, variantProps, classProps, disabledCheck, interfaceProps, cssClasses, component, propTypes),
         flutter: this.flutterTemplate(componentName, variantProps, interfaceProps, propTypes),
         vue: this.vueTemplate(componentName, variantProps),
-        webComponents: this.webComponentsTemplate(componentName, variantProps),
-        typescript: this.typescriptTemplate(componentName, componentNameTypes, variantProps, interfaceProps, propTypes),
+        webComponents: this.webComponentsTemplate(componentName, component, variantProps, classProps),
+        typescript: this.typescriptTemplate(component, componentName, componentNameTypes, variantProps, interfaceProps, propTypes),
         css: this.cssTemplate(cssClasses, component, componentName, variantProps),
         scss: this.scssTemplate(cssClasses, component, componentName, variantProps),
       };
@@ -109,28 +137,39 @@ export class MessageService {
     }
   }
 
-  private reactTemplate(componentName: string, componentNameTypes: string, cssFileName: string, variantProps: any[], classProps: string, disabledCheck: boolean, interfaceProps: string, cssClasses: string) {
+  private reactTemplate(componentName: string, component: any, componentNameTypes: string, cssFileName: string, variantProps: any[], classProps: string, disabledCheck: boolean, interfaceProps: string, cssClasses: string) {
+    const camelCaseName = camelCase(component.name);
+    const PascalCaseName = upperFirst(camelCaseName);
+    const bemClasses = this.bemClassNames(componentName.toLowerCase(), {classProps});
+    const classNames = `${componentName.toLowerCase()}, ${bemClasses}`;
+
     return `
-// ${componentName}.tsx
+// ${PascalCaseName}.tsx
 // @name: ${componentName}
 // @description: React Component generated by PropFusion
 // @params: ${variantProps.map(([key]) => key.split('#')[0].replace(/\s+/g, '')).join(', ')}
 
 import React from 'react';
-import { ${componentName}Props } from './${componentName}Types';
+import { ${PascalCaseName}Props } from './${componentName}Types';
 import './${cssFileName}';
 
-const ${componentName}: React.FC<${componentName}Props> = (props) => {
-  return <button className="${componentName.toLowerCase()}-component" ${classProps}" disabled={props.disabled || ${
-          disabledCheck ? 'true' : 'false'
-        }} >Button</button>;
+const ${PascalCaseName}: React.FC<${PascalCaseName}Props> = ({
+  ${interfaceProps}
+}) => {
+  
+  return <div className="${classNames}">
+        // ${PascalCaseName} Content goes here
+        // Add your text props and build your structure!
+      </div>;
 };
 
-export default ${componentName};
+export default ${PascalCaseName};
       `
   }
 
-  private angularTemplate(componentName: string, cssFileName: string, variantProps: any[], classProps: string, disabledCheck: boolean, interfaceProps: string, cssClasses: string, component: any, propTypes: string) {
+  private angularTemplate(componentName: string, componentNameTypes: string, cssFileName: string, variantProps: any[], classProps: string, disabledCheck: boolean, interfaceProps: string, cssClasses: string, component: any, propTypes: string) {
+    const camelCaseName = camelCase(component.name);
+    const PascalCaseName = upperFirst(camelCaseName);
     return `
 // ${component.name.toLowerCase()}.component.ts
 // @name: ${componentName}
@@ -139,24 +178,24 @@ export default ${componentName};
 
 import { Component, Input } from '@angular/core';
 import './${cssFileName}';
-
-${propTypes}
+import { ${PascalCaseName}Props } from './${componentName}Types';
 
 @Component({
-  selector: '${component.name.toLowerCase()}-component',
+  selector: '${component.name.toLowerCase()}',
   template: \`
-    <button [class]="'${componentName.toLowerCase()} ' + (${classProps})" [disabled]="disabled || ${disabledCheck}">
+    <button [ngClass]="'${component.name.toLowerCase()}'" ${classProps} [disabled]="disabled">
       Button
     </button>
   \`,
   styleUrls: ['./${cssFileName}']
 })
 export class ${componentName} {
-  @Input() disabled: boolean = false;
+  @Input()  disabled: boolean = false;
   ${interfaceProps
     .split('\n')
     .map((prop) => '@Input() ' + prop)
-    .join('\n  ')}
+    .join('\n  ')
+    .toLowerCase()}
 }
 `;
   }
@@ -216,17 +255,64 @@ class ${componentName} extends StatelessWidget {
 `
   }
 
-  private webComponentsTemplate(componentName: string, variantProps: any[]) {
+  private webComponentsTemplate(componentName: string, component: any, variantProps: any[], classProps: string) {
+    const camelCaseName = camelCase(component.name);
+    const PascalCaseName = upperFirst(camelCaseName);
     return `
 // ${componentName}.html
 // @name: ${componentName}
 // @description: WebComponent generated by PropFusion
 // @params: ${variantProps.map(([key]) => key.split('#')[0].replace(/\s+/g, '')).join(', ')}
-// Coming soon...
+
+class ${PascalCaseName} extends HTMLElement {
+  constructor() {
+    super();
+
+    this.attachShadow({ mode: 'open' });
+
+    // add styles here
+  }
+
+  static get observedAttributes() {
+    return ['togglealert', 'class', 'size', 'state', 'disabled'];
+  }
+
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (oldValue !== newValue) {
+      this.render();
+    }
+  }
+
+  connectedCallback() {
+    this.render();
+  }
+
+  render() {
+    const toggleAlert = this.getAttribute('togglealert') === 'true';
+    const buttonClass = this.getAttribute('class') || '';
+    const size = this.getAttribute('size') || '';
+    const state = this.getAttribute('state') || '';
+    const disabled = this.getAttribute('disabled') === 'true';
+
+    const button = this.shadowRoot.querySelector('button');
+    button.className = ${componentName} ${classProps}};
+    button.disabled = disabled;
+
+    button.addEventListener('click', () => {
+      if (!disabled) {
+        this.dispatchEvent(new CustomEvent('iconButtonClick'));
+      }
+    });
+  }
+}
+
+customElements.define(${componentName}, ${PascalCaseName});
 `
   }
 
-  private typescriptTemplate(componentName: string, componentNameTypes: string, variantProps: any[], interfaceProps: string, propTypes: string) {
+  private typescriptTemplate(component: any, componentName: string, componentNameTypes: string, variantProps: any[], interfaceProps: string, propTypes: string) {
+    const camelCaseName = camelCase(component.name);
+    const PascalCaseName = upperFirst(camelCaseName);
     return `
 // ${componentNameTypes}.ts
 // @name: ${componentNameTypes}
@@ -235,7 +321,7 @@ class ${componentName} extends StatelessWidget {
 
 ${propTypes}
 
-export interface ${componentName}Props {
+export interface ${PascalCaseName}Props {
   ${interfaceProps}
   disabled?: boolean;
 }
@@ -252,14 +338,17 @@ ${cssClasses}
 `
   }
 
-  private scssTemplate(cssClasses: string, component: any, componentName: string, variantProps: any[]) { 
+  private scssTemplate(cssClasses: string, component: any, componentName: string, variantProps: any[]) {
     return `
 // ${component.name.toLowerCase()}.scss
 // @name: ${componentName}
 // @description: Styles generated by PropFusion
 // @params: ${variantProps.map(([key]) => key.split('#')[0].replace(/\s+/g, '')).join(', ')}
-// Coming soon...
-    `
+.${componentName.toLowerCase()}-component { 
+  /* Base styles for the component */ 
+  ${cssClasses.trim().replace(/\.(\w+)-/g, '& .-$1-')}  /* Nested variant styles */
+}
+`; 
   }
 }
 

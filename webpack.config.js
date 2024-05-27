@@ -16,14 +16,14 @@ module.exports = (env, argv) => ({
       { test: /\.tsx?$/, use: 'ts-loader', exclude: /node_modules/ },
       { test: /\.css$/, use: ['style-loader', { loader: 'css-loader' }] },
       { test: /\.(png|jpg|gif|webp|svg)$/, loader: 'url-loader' },
-
-      // {
-      //   test: /\.(png|jpg|jpeg|gif|svg)$/i,
-      //   type: 'asset/resource',
-      //   generator: {
-      //     filename: 'src/app/assets/[name][ext]'
-      //   }
-      // }
+      {
+        test: /\.scss$/,
+        use: [
+          'style-loader', // creates style nodes from JS strings
+          'css-loader', // translates CSS into CommonJS
+          'sass-loader' // compiles Sass to CSS, using Dart Sass by default
+        ]
+      }
     ],
   },
 

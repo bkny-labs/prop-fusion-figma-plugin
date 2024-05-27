@@ -41,8 +41,7 @@ export class StateService {
       this.state[key].next(value);
     }
     figma.ui.postMessage({ type: 'state-update', key, value });
-    logger.log('🍌🍌 State updated:', key, value);
-  }
+  }  
 }
 
 export const stateService = new StateService();

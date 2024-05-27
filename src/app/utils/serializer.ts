@@ -1,23 +1,17 @@
-function rgbToHex(r, g, b) {
-  return "#" + [r, g, b].map(x => {
-    const hex = Math.round(x * 255).toString(16);
-    return hex.length === 1 ? "0" + hex : hex;
-  }).join('');
-}
+import { rgbToHex } from './rgba-to-hex';
 
-// Should do the lookup for bound variables somewhere else
-// function getVariableName(variableId) {
-//   const variable = figma.getLocalPaintStyles().find(style => style.id === variableId);
-//   return variable ? variable.name : null;
-// }
-
-export function serializeNode(node, depth = 0): any {
+// @name serializeNode
+// @params node: any, depth: number, getVariablesByIds: any
+// @description Serializes a node
+// @returns Promise<any>
+export function serializeNode(node, depth = 0) {
   const componentSet = node.type === 'COMPONENT_SET' && depth === 0;
   const componentPropertyDefinitionNames = componentSet && node.componentPropertyDefinitions ? Object.keys(node.componentPropertyDefinitions) : [];
   const variantGroupPropertyNames = componentSet && node.variantGroupProperties ? Object.keys(node.variantGroupProperties) : [];
   const componentPropertyDefinitions = {};
   const variantGroupProperties = {};
   let serializedChildren = [];
+  let defaultProps = {};
 
   if (componentSet) {
     componentPropertyDefinitionNames.forEach(name => {
@@ -30,18 +24,20 @@ export function serializeNode(node, depth = 0): any {
     });
 
     if (node.children) {
+      const firstChild = node.children[0];
+      defaultProps = firstChild ? { ...firstChild.props } : {};
       serializedChildren = node.children.map(child => {
         // Ignore the child's children
         const { children, ...childWithoutChildren } = child;
 
-        return { ...childWithoutChildren, 
-
+        return { 
+          ...childWithoutChildren, 
           // id: child.id,
           type: child.type,
           name: child.name,
-          // devStatus: child.devStatus,
           props: {
             opacity: child.opacity,
+            // backgrounds: Array.isArray(child.backgrounds) ? Promise.all(child.backgrounds.map(processBoundVariables)) : [],
             backgrounds: Array.isArray(child.backgrounds) ? child.backgrounds.map(background => ({
               type: background.type, 
               visible: background.visible,
@@ -142,5 +138,7 @@ export function serializeNode(node, depth = 0): any {
     defaultVariantName: node.defaultVariant ? node.defaultVariant.name : null,
     componentPropertyDefinitions: componentSet ? componentPropertyDefinitions : {},
     children: serializedChildren,
-    variantGroupProperties: componentSet && depth < 1 ? variantGroupProperties : {},  }
+    variantGroupProperties: componentSet && depth < 1 ? variantGroupProperties : {},  
+    defaultProps: defaultProps,
+  }
 }
