@@ -30,6 +30,7 @@ class FigmaController {
   }
 
   async copyToClipboard(code: string) {
+    console.log('do we make it here for copy?', code);
     try {
       await navigator.clipboard.writeText(code);
       parent.postMessage(
@@ -205,7 +206,9 @@ class FigmaController {
   
     await transformObject(data);
 
-    console.log('Data:', data);
+    
+    this._stateService.setSlice(StateNames.VARIANT_PROPERTIES, data);
+    console.log('variant properties', this._stateService.getValue(StateNames.VARIANT_PROPERTIES));
 
     return data;
   }

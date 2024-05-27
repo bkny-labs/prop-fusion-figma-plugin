@@ -39,7 +39,7 @@ const Tabs: React.FC<TabsProps> = ({ style, codeSnippets, showTabs }) => {
       code: undefined
     },
     {
-      id: 'webComponents', label: 'WC', icon: <SiWebcomponentsdotorg />,
+      id: 'webComponents', label: 'Web Components', icon: <SiWebcomponentsdotorg />,
       code: undefined
     },
     {

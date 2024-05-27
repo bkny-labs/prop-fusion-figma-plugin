@@ -91,7 +91,6 @@ const Home: React.FC = () => {
     parent.postMessage({ pluginMessage: { type: 'generate-code-snippets', selection: currentSelection } }, '*');
     toggleStep(3);
     if (formRef.current) {
-      console.log('formRef.current exists');
       formRef.current.handleSubmit();
       const formData = formRef.current?.getValues();
       console.log('form data', formData);
