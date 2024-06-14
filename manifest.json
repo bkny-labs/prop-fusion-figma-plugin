@@ -10,7 +10,7 @@
     ],
     "allowedDomains": ["none"]
   },
-  "documentAccess": "none",
+  "documentAccess": "dynamic-page",
   "editorType": ["figma", "dev"],
   "capabilities": ["codegen", "vscode", "inspect"],
   "codegenLanguages": [

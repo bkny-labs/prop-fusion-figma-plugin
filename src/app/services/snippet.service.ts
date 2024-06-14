@@ -2,7 +2,7 @@ import { stateService } from './state.service';
 import { StateNames } from '../../types/states.model';
 import { heightLarge, widthLarge } from '../../plugin/controller';
 import { camelCase, upperFirst } from 'lodash';
-export class MessageService {
+export class SnippetService {
   public handleResize(msg): void {
     figma.ui.resize(msg.width, msg.height);
   }
